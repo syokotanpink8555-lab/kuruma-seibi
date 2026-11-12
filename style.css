@@ -81,3 +81,16 @@ h3{font-size:16px;margin:16px 0 4px}
 .tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left}
 .site-foot{border-top:1px solid var(--line);font-size:13px;color:var(--sub);padding:16px 0 30px}
 [hidden]{display:none!important}
+.part{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:12px 0;scroll-margin-top:130px}
+.part h3{font-size:15px}
+.honne{background:var(--yel-bg);border-radius:8px;padding:8px 12px;font-weight:600;margin:8px 0}
+.honne span{display:block;font-size:12px;font-weight:700;color:var(--sub)}
+.lv{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+.lv th,.lv td{padding:6px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.lv th{white-space:nowrap;width:7.5em}
+.lv-red th{background:var(--red-bg)} .lv-yellow th{background:var(--yel-bg)} .lv-white th{background:var(--bg)}
+.ask{padding-left:1.2em;margin:4px 0}
+.gen{font-size:13px;color:var(--sub);border-top:1px dashed var(--line);padding-top:8px;margin-top:10px}
+ol li{margin:4px 0}
+@media(max-width:480px){.tbl{font-size:13px}.tbl th,.tbl td{padding:5px}}
+.lg.c-white{background:var(--card);border:1px solid var(--line)}

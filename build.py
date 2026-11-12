@@ -3,11 +3,12 @@ import html
 from pathlib import Path
 
 from data_keikoku import LIGHTS
+from data_koukan import ITEMS, CATS, CHECK_ALWAYS, ADDITIVES
 
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "くるま整備ノート"
-UPDATED = "2026-11-12"
+UPDATED = "2026-11-13"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
 CHECK_TXT = "現役の自動車整備士が内容をチェックしています" if REVIEWED else "現役の自動車整備士による内容チェックを順次行っています"
@@ -40,7 +41,7 @@ def page(title, desc, body, depth=1, path=""):
 <body>
 <header class="site-head"><div class="wrap">
   <a class="logo" href="{up or './'}">🔧 {SITE}</a>
-  <nav><a href="{up}keikoku/">警告灯</a><a href="{up}oil/">オイル交換</a><a href="{up}about/">このサイトについて</a></nav>
+  <nav><a href="{up}keikoku/">警告灯</a><a href="{up}oil/">オイル交換</a><a href="{up}koukan/">交換時期</a><a href="{up}about/">このサイトについて</a></nav>
 </div></header>
 <main class="wrap">
 {body}
@@ -78,6 +79,11 @@ def build_index():
     <span class="card-ic">🛢️</span>
     <h2>オイル交換時期の計算</h2>
     <p>前回の交換日と走行距離を入れるだけで、次の交換の目安を計算します。</p>
+  </a>
+  <a class="card" href="koukan/">
+    <span class="card-ic">🧰</span>
+    <h2>消耗品の交換時期、整備士の本音</h2>
+    <p>見積もりに並んだ交換、今やるべき？ ブレーキパッド・タイヤ・バッテリーなど16項目を3段階で。</p>
   </a>
 </div>
 <section class="box">
@@ -309,6 +315,123 @@ def build_oil():
     write("oil/index.html", page("オイル交換時期の計算ツール", "前回のオイル交換日と走行距離を入れるだけで、次のオイル交換の目安を計算。現役整備士の基準で「おすすめ」と「遅くとも」の2段階表示。ガソリン車・軽自動車・ターボ車・ディーゼル車に対応。", body))
 
 
+# ---------------- 消耗品の交換時期 ----------------
+LV3 = [("red", "🔴 今すぐ"), ("yellow", "🟡 近いうちに"), ("white", "⚪ 様子見でいい")]
+
+
+def build_koukan():
+    items = []
+    for it in ITEMS:
+        rows = "".join(
+            f'<tr class="lv-{k}"><th>{lab}</th><td>{"<br>".join(e(x) for x in it[k])}</td></tr>'
+            for k, lab in LV3 if it[k])
+        ask = "".join(f"<li>{e(a)}</li>" for a in it["ask"])
+        ask = f'<h3>お店に聞くといい質問</h3><ul class="ask">{ask}</ul>' if ask else ""
+        note = it.get("note", "")
+        note = note if it.get("html_note") else e(note)
+        note = f'<p class="tip">💡 {note}</p>' if note else ""
+        alias = f'<p class="look">別の書き方：{e(it["alias"])}</p>' if it["alias"] else ""
+        items.append(f"""
+<article class="part" id="{it['id']}" data-cat="{it['cat']}" data-kw="{e(it['name'] + ' ' + it['alias'])}">
+  <div class="light-head"><h2>{e(it['name'])}</h2><span class="badge b-info">{CATS[it['cat']]}</span></div>
+  {alias}
+  <p class="honne"><span>整備士の本音</span>{e(it['honne'])}</p>
+  <table class="lv">{rows}</table>
+  <h3>放っておくと</h3>
+  <p>{e(it['risk'])}</p>
+  {ask}
+  {note}
+  <p class="gen"><b>一般的な目安（AIの小太郎が調べたもの）：</b>{e(it['general'])}</p>
+</article>""")
+
+    toc = "".join(f'<li><a href="#{it["id"]}">{e(it["name"])}</a></li>' for it in ITEMS)
+    chips = '<button data-c="" class="on">すべて</button>' + "".join(
+        f'<button data-c="{k}">{v}</button>' for k, v in CATS.items())
+    always = "".join(f"<tr><td>{e(a)}</td><td><b>{e(b)}</b></td><td>{e(c)}</td></tr>" for a, b, c in CHECK_ALWAYS)
+    adds = "".join(f"<h3>{e(n)}</h3><ul><li><b>いらない人：</b>{e(no)}</li><li><b>入れてもいい人：</b>{e(yes)}</li></ul>"
+                   for n, no, yes in ADDITIVES)
+    body = f"""
+<h1>消耗品の交換時期、整備士の本音</h1>
+<p class="lead">点検や車検の見積もりに、交換の項目がずらっと並んでいる。でも、どれを今やるべきなの？――
+そんなときのために、<b>現役の自動車整備士が、見積もりを見て優先度を決めるときの基準</b>をまとめました。</p>
+
+<div class="legend">
+  <div class="lg c-red"><b>🔴 今すぐ</b>：先延ばしにしないで、今回やったほうがいい</div>
+  <div class="lg c-yellow"><b>🟡 近いうちに</b>：今回でなくてもいいが、次の点検までには</div>
+  <div class="lg c-white"><b>⚪ 様子見でいい</b>：まだ急がなくていいことが多い</div>
+</div>
+
+<section class="box">
+  <h2>見積もりを見るときの3つのコツ</h2>
+  <ol>
+    <li><b>数字で聞く。</b>「そろそろ交換です」ではなく、「残り何mm？」「何年前に替えた？」と聞くと、自分で判断できます。</li>
+    <li><b>「ついでに替えたほうがいい部品はありますか？」はどの項目でも使える質問。</b>部品を外すついでに作業すると、工賃が安くすむことがあります。</li>
+    <li><b>交換の記録は自分でも持っておく。</b>お店の人も人間なので、まちがいはあります（例：最近1本だけ替えたタイヤまで4本分の見積もりが出る）。いつ・何を替えたか、メモしておくと安心です。</li>
+  </ol>
+</section>
+
+<div class="search">
+  <input id="q" type="search" placeholder="例：タイヤ、ATF、ファンベルト" aria-label="項目を検索">
+  <div class="chips" role="group" aria-label="種類でしぼりこむ">{chips}</div>
+  <p id="count" class="count"></p>
+</div>
+
+<details class="toc"><summary>一覧（{len(ITEMS)}項目）</summary><ul>{toc}</ul></details>
+
+<div id="list">{''.join(items)}</div>
+<p id="none" class="none" hidden>見つかりませんでした。別の言葉で探してみてください。</p>
+
+<section class="box" id="always">
+  <h2>見積もりに無くても、自分から確認したい項目</h2>
+  <p>見積もりに入っていないからといって、問題がないとは限りません。次の条件に当てはまったら、自分から聞いてみてください。</p>
+  <table class="tbl">
+    <thead><tr><th>こんなとき</th><th>確認する項目</th><th>理由</th></tr></thead>
+    <tbody>{always}</tbody>
+  </table>
+</section>
+
+<section class="box" id="additive">
+  <h2>添加剤は入れたほうがいい？</h2>
+  <p>エンジン内部洗浄・燃料添加剤・オイル添加剤は、<b>入れるも入れないも自由</b>です。整備士の考えはこうです。</p>
+  {adds}
+  <p class="tip">⚠️ 自分で選んだ添加剤を入れるときは注意。オイルと添加剤の組み合わせによっては、エンジンを傷めたり、オイルが固まったりすることがあります。
+  整備士によると、ディーラーで売っているものは、そのディーラーで使うオイルに入れても問題ないことが確認されているそうです。</p>
+</section>
+
+<section class="box">
+  <h2>このページについて</h2>
+  <p>「🔴🟡⚪」の基準と「整備士の本音」は、現役の自動車整備士が、見積もりの優先度を判断するために自分で書いた表がもとになっています。
+  「一般的な目安」は、メーカーや業界団体の公開情報をもとにAIの小太郎が調べて書いたもので、<b>整備士のチェックはこれから</b>です（確認できしだい更新します）。</p>
+  <p>参考：<a href="https://www.jatma.or.jp/tekisei/pdf/long-term.pdf" rel="noopener">日本自動車タイヤ協会「長期経過タイヤの点検・交換について」</a></p>
+  <p class="small">交換時期は車種・年式・使い方で変わります。自分の車の指定は、取扱説明書とメンテナンスノートで確認してください。走っていて異常を感じたら、時期に関係なく点検を受けてください。</p>
+</section>
+
+<script>
+(function(){{
+  var q=document.getElementById('q'),list=document.querySelectorAll('.part'),
+      chips=document.querySelectorAll('.chips button'),none=document.getElementById('none'),
+      count=document.getElementById('count'),cat='';
+  function norm(s){{return s.toLowerCase().replace(/\s+/g,' ')}}
+  function run(){{
+    var words=norm(q.value).split(' ').filter(Boolean),n=0;
+    list.forEach(function(el){{
+      var kw=norm(el.dataset.kw+' '+el.textContent);
+      var ok=(!cat||el.dataset.cat===cat)&&words.every(function(w){{return kw.indexOf(w)>=0}});
+      el.hidden=!ok; if(ok)n++;
+    }});
+    none.hidden=n>0; count.textContent=(words.length||cat)?n+'件':'';
+  }}
+  q.addEventListener('input',run);
+  chips.forEach(function(b){{b.addEventListener('click',function(){{
+    chips.forEach(function(x){{x.classList.remove('on')}});b.classList.add('on');cat=b.dataset.c;run();
+  }})}});
+}})();
+</script>
+"""
+    write("koukan/index.html", page("消耗品の交換時期、整備士の本音",
+          "ブレーキパッド・タイヤ・バッテリー・CVTフルードなど、見積もりに出てくる消耗品16項目の交換時期を、現役整備士の基準で「今すぐ／近いうちに／様子見」の3段階に。お店に聞くといい質問も。", body))
+
+
 # ---------------- このサイトについて ----------------
 def build_about():
     body = f"""
@@ -357,12 +480,30 @@ def build_check():
     out = ROOT.parent.parent / "02_お願い" / "整備士チェック_警告灯とオイル.md"
     out.write_text("\n".join(lines), encoding="utf-8")
 
+    # 交換時期ページ（整備士の表を小太郎が言い換えた部分の確認用）
+    lines = ["# 整備士チェック表（消耗品の交換時期）", "",
+             "オーナーさんへ：ルール表をもとに小太郎が書き直した文章です。言い換えでニュアンスが変わったところがあれば「番号＋一言」で。OKなら「全部OK」で大丈夫です。",
+             "「一般的な目安」は小太郎が公開情報で調べたもの（まちがいがあれば教えてください）。", ""]
+    for i, it in enumerate(ITEMS, 1):
+        lines.append(f"## {i}. {it['name']}")
+        lines.append(f"- 本音：{it['honne']}")
+        for k, lab in LV3:
+            for x in it[k]:
+                lines.append(f"- {lab}：{x}")
+        lines.append(f"- 放っておくと：{it['risk']}")
+        if it.get("note"):
+            lines.append(f"- ひとこと：{it['note']}")
+        lines.append(f"- 一般的な目安（小太郎が調べた）：{it['general']}")
+        lines.append("")
+    out = ROOT.parent.parent / "02_お願い" / "整備士チェック_交換時期.md"
+    out.write_text("\n".join(lines), encoding="utf-8")
+
 
 def main():
     css = (ROOT / "style.css").read_text(encoding="utf-8")
     write("assets/style.css", css)
     write(".nojekyll", "")
-    build_index(); build_keikoku(); build_oil(); build_about(); build_check()
+    build_index(); build_keikoku(); build_oil(); build_koukan(); build_about(); build_check()
     print("built:", sorted(str(p.relative_to(OUT)) for p in OUT.rglob("*") if p.is_file()))
 
 
