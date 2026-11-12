@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>オイル交換時期の計算ツール｜くるま整備ノート</title>
+<meta name="description" content="前回のオイル交換日と走行距離を入れるだけで、次のオイル交換の目安（日付・距離）を計算。ガソリン車・ターボ車・ディーゼル車、シビアコンディションに対応。">
+<meta property="og:title" content="オイル交換時期の計算ツール｜くるま整備ノート">
+<meta property="og:description" content="前回のオイル交換日と走行距離を入れるだけで、次のオイル交換の目安（日付・距離）を計算。ガソリン車・ターボ車・ディーゼル車、シビアコンディションに対応。">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-head"><div class="wrap">
+  <a class="logo" href="../">🔧 くるま整備ノート</a>
+  <nav><a href="../keikoku/">警告灯</a><a href="../oil/">オイル交換</a><a href="../about/">このサイトについて</a></nav>
+</div></header>
+<main class="wrap">
+
+<h1>オイル交換時期の計算ツール</h1>
+<p class="lead">前回オイル交換した日と走行距離を入れると、次の交換の目安（日付と距離）を計算します。
+<b>「距離」と「期間」のどちらか早いほう</b>が交換のタイミングです。</p>
+
+<form id="f" class="tool" onsubmit="return false">
+  <label>車のタイプ
+    <select id="type">
+      <option value="na">ガソリン車（ターボなし・軽自動車含む）</option>
+      <option value="turbo">ターボ車（軽ターボ含む）</option>
+      <option value="diesel">ディーゼル車</option>
+      <option value="custom">自分で指定する（取扱説明書の数値など）</option>
+    </select>
+  </label>
+  <fieldset>
+    <legend>車の使い方</legend>
+    <label class="radio"><input type="radio" name="cond" value="normal" checked> ふつう</label>
+    <label class="radio"><input type="radio" name="cond" value="severe"> シビアコンディション
+      <button type="button" class="q" id="sev-btn" aria-expanded="false">これは何？</button></label>
+    <div id="sev" class="sev" hidden>
+      次のどれかに当てはまる使い方は、エンジンへの負担が大きい「シビアコンディション」です。
+      <ul>
+        <li>近所の買い物など、短い距離（1回8km以下が目安）の運転をくり返す</li>
+        <li>渋滞やのろのろ運転、アイドリングが多い</li>
+        <li>山道・坂道が多い（走行距離の3割以上が目安）</li>
+        <li>砂利道・雪道などの悪路が多い（走行距離の3割以上が目安）</li>
+        <li>1年に2万km以上走る</li>
+      </ul>
+      街乗り中心の車でも、当てはまることが少なくありません。
+    </div>
+  </fieldset>
+  <div id="custom" class="row" hidden>
+    <label>交換の距離（km）<input id="ckm" type="number" inputmode="numeric" min="500" step="500" value="5000"></label>
+    <label>交換の期間（ヶ月）<input id="cmo" type="number" inputmode="numeric" min="1" max="24" value="6"></label>
+  </div>
+  <div class="row">
+    <label>前回交換した日<input id="date" type="date" required></label>
+    <label>前回交換時の走行距離（km）<input id="odo0" type="number" inputmode="numeric" min="0" placeholder="例：42000"></label>
+  </div>
+  <label><span>今の走行距離（km）<span class="opt">わかれば</span></span><input id="odo1" type="number" inputmode="numeric" min="0" placeholder="例：45500"></label>
+</form>
+
+<div id="out" class="result" aria-live="polite" hidden></div>
+
+<section class="box">
+  <h2>目安の考え方</h2>
+  <p>このツールは、国内メーカーの取扱説明書でよく見られる交換時期をもとにしています。</p>
+  <table class="tbl">
+    <thead><tr><th>車のタイプ</th><th>ふつう</th><th>シビア</th></tr></thead>
+    <tbody>
+      <tr><td>ガソリン車（ターボなし）</td><td>15,000km または 1年</td><td>7,500km または 6ヶ月</td></tr>
+      <tr><td>ターボ車</td><td>5,000km または 6ヶ月</td><td>2,500km または 3ヶ月</td></tr>
+      <tr><td>ディーゼル車</td><td>10,000km または 1年</td><td>5,000km または 6ヶ月</td></tr>
+    </tbody>
+  </table>
+  <p>実際の交換時期は車種・年式・使うオイルによって違います。<b>いちばん確かなのは、あなたの車の取扱説明書（メンテナンスノート）</b>です。
+  その数値がわかる場合は「自分で指定する」を選んでください。</p>
+  <h3>オイルエレメント（フィルター）は？</h3>
+  <p>オイル交換2回に1回の交換が一般的な目安です。</p>
+  <h3>あまり走らないなら交換しなくていい？</h3>
+  <p>エンジンオイルは走らなくても時間とともに劣化します。距離が少なくても、期間の目安が来たら交換するのがおすすめです。</p>
+</section>
+
+<script>
+(function(){
+  var T={na:{normal:[15000,12],severe:[7500,6]},turbo:{normal:[5000,6],severe:[2500,3]},diesel:{normal:[10000,12],severe:[5000,6]}};
+  var $=function(id){return document.getElementById(id)};
+  var f=$('f'),out=$('out');
+  $('sev-btn').addEventListener('click',function(){var s=$('sev');s.hidden=!s.hidden;this.setAttribute('aria-expanded',!s.hidden)});
+  function addMonths(d,m){var r=new Date(d.getFullYear(),d.getMonth()+m,d.getDate());if(r.getDate()!==d.getDate())r.setDate(0);return r}
+  function fmt(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'}
+  function n(v){return v===''?null:Math.max(0,Math.floor(Number(v)))}
+  function c(x){return x.toLocaleString('ja-JP')}
+  function run(){
+    var type=$('type').value,cond=f.querySelector('input[name=cond]:checked').value;
+    $('custom').hidden=type!=='custom';
+    f.querySelectorAll('input[name=cond]').forEach(function(r){r.disabled=type==='custom'});
+    var km,mo;
+    if(type==='custom'){km=n($('ckm').value);mo=Math.min(n($('cmo').value)||0,36);if(!km||!mo){out.hidden=true;return}}
+    else{km=T[type][cond][0];mo=T[type][cond][1]}
+    var dv=$('date').value;if(!dv){out.hidden=true;return}
+    var p=dv.split('-'),d0=new Date(+p[0],p[1]-1,+p[2]);
+    if(p.length!==3||isNaN(d0)){out.hidden=true;return}
+    var today=new Date();today=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    if(d0>today){out.innerHTML='<p class="st st-soon">前回交換日が未来の日付になっています。日付を確認してください。</p>';out.hidden=false;return}
+    var due=addMonths(d0,mo),days=Math.round((due-today)/864e5);
+    var o0=n($('odo0').value),o1=n($('odo1').value);
+    var h='<h2>次のオイル交換の目安</h2><div class="due">';
+    h+='<div><span>期間で</span><b>'+fmt(due)+'</b><small>'+(days>=0?'あと'+days+'日':Math.abs(days)+'日過ぎています')+'</small></div>';
+    var leftKm=null;
+    if(o0!==null){
+      var dueKm=o0+km;
+      h+='<div><span>距離で</span><b>'+c(dueKm)+' km</b>';
+      if(o1!==null&&o1<o0)h+='<small>今の走行距離が前回より小さくなっています。数字を確認してください。</small>';
+      if(o1!==null&&o1>=o0){leftKm=dueKm-o1;h+='<small>'+(leftKm>=0?'あと'+c(leftKm)+' km':c(-leftKm)+' km 超えています')+'</small>'}
+      h+='</div>';
+    }
+    h+='</div>';
+    var late=days<0||(leftKm!==null&&leftKm<0),soon=!late&&(days<=30||(leftKm!==null&&leftKm<=500));
+    var cls=late?'late':soon?'soon':'ok';
+    var msg=late?'交換の目安を過ぎています。早めに交換しましょう。':soon?'そろそろ交換の時期です。予約や準備をしておきましょう。':'まだ大丈夫です。どちらか早いほうを目安にしてください。';
+    if(o0!==null&&o1!==null&&o1>o0&&!late){
+      var used=(today-d0)/864e5;
+      if(used>=14){var perDay=(o1-o0)/used,kmDay=Math.round(leftKm/perDay);
+        if(kmDay<days){var pd=new Date(today.getTime()+kmDay*864e5);
+          if(kmDay<=30&&cls==='ok'){cls='soon';msg='そろそろ交換の時期です。予約や準備をしておきましょう。'}
+          msg+='<br>今のペース（1日約'+c(Math.round(perDay))+'km）だと、<b>'+fmt(pd)+'ごろ</b>に距離の目安に届きそうです。'}}
+    }
+    h+='<p class="st st-'+cls+'">'+msg+'</p>';
+    h+='<p class="small">使った目安：'+c(km)+'km または '+mo+'ヶ月。取扱説明書の指定があればそちらを優先してください。</p>';
+    out.innerHTML=h;out.hidden=false;
+  }
+  f.addEventListener('input',run);f.addEventListener('change',run);run();
+})();
+</script>
+
+</main>
+<footer class="site-foot"><div class="wrap">
+  <p>このサイトは、AIの「小太郎」が作り、現役の自動車整備士による内容チェックを順次行っています。
+  車の状態は車種や年式で違います。最終的には取扱説明書と整備工場の判断に従ってください。</p>
+  <p><a href="../about/">運営・免責事項</a>　最終更新 2026-11-12</p>
+</div></footer>
+</body>
+</html>
