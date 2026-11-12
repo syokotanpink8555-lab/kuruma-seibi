@@ -24,7 +24,8 @@
 <form id="f" class="tool" onsubmit="return false">
   <label>車のタイプ
     <select id="type">
-      <option value="na">ガソリン車（ターボなし・軽自動車含む）</option>
+      <option value="na">ガソリン車（ターボなし・普通車）</option>
+      <option value="kei">軽自動車（ターボなし）</option>
       <option value="turbo">ターボ車（軽ターボ含む）</option>
       <option value="diesel">ディーゼル車</option>
       <option value="custom">自分で指定する（取扱説明書の数値など）</option>
@@ -61,18 +62,23 @@
 <div id="out" class="result" aria-live="polite" hidden></div>
 
 <section class="box">
-  <h2>目安の考え方</h2>
-  <p>このツールは、国内メーカーの取扱説明書でよく見られる交換時期をもとにしています。</p>
+  <h2>目安の考え方（整備士のおすすめ）</h2>
+  <p>このツールの目安は、このサイトの内容をチェックしている現役の自動車整備士の意見をもとにしています。</p>
   <table class="tbl">
     <thead><tr><th>車のタイプ</th><th>ふつう</th><th>シビア</th></tr></thead>
     <tbody>
-      <tr><td>ガソリン車（ターボなし）</td><td>15,000km または 1年</td><td>7,500km または 6ヶ月</td></tr>
-      <tr><td>ターボ車</td><td>5,000km または 6ヶ月</td><td>2,500km または 3ヶ月</td></tr>
-      <tr><td>ディーゼル車</td><td>10,000km または 1年</td><td>5,000km または 6ヶ月</td></tr>
+      <tr><td>ガソリン車（ターボなし・普通車）</td><td>10,000km または 1年</td><td>5,000km または 6ヶ月</td></tr>
+      <tr><td>軽自動車（ターボなし）</td><td>7,500km または 1年</td><td>5,000km または 6ヶ月</td></tr>
+      <tr><td>ターボ車（軽ターボ含む）</td><td>5,000km または 6ヶ月</td><td>2,500km または 3ヶ月</td></tr>
+      <tr><td>ディーゼル車</td><td>5,000km または 6ヶ月</td><td>2,500km または 3ヶ月</td></tr>
     </tbody>
   </table>
-  <p>実際の交換時期は車種・年式・使うオイルによって違います。<b>いちばん確かなのは、あなたの車の取扱説明書（メンテナンスノート）</b>です。
-  その数値がわかる場合は「自分で指定する」を選んでください。</p>
+  <h3>取扱説明書には「15,000km」と書いてあるけど？</h3>
+  <p>国内メーカーの取扱説明書では、ターボなしのガソリン車で「15,000kmまたは1年」となっている車種も多くあります。
+  ただ、整備の現場から見ると15,000kmは遅すぎるというのが正直なところで、<b>車種にもよりますが、最低でも10,000kmでの交換</b>をおすすめします。
+  軽自動車はエンジンが小さく回転数が高くなりやすいので、それより少し早め、ターボ車はその半分くらいが目安です。</p>
+  <p>ディーゼル車は車種による違いが大きいので、取扱説明書の指定も必ず確認してください。
+  取扱説明書の数値で計算したい場合は「自分で指定する」を選んでください。</p>
   <h3>オイルエレメント（フィルター）は？</h3>
   <p>オイル交換2回に1回の交換が一般的な目安です。</p>
   <h3>あまり走らないなら交換しなくていい？</h3>
@@ -81,7 +87,7 @@
 
 <script>
 (function(){
-  var T={na:{normal:[15000,12],severe:[7500,6]},turbo:{normal:[5000,6],severe:[2500,3]},diesel:{normal:[10000,12],severe:[5000,6]}};
+  var T={na:{normal:[10000,12],severe:[5000,6]},kei:{normal:[7500,12],severe:[5000,6]},turbo:{normal:[5000,6],severe:[2500,3]},diesel:{normal:[5000,6],severe:[2500,3]}};
   var $=function(id){return document.getElementById(id)};
   var f=$('f'),out=$('out');
   $('sev-btn').addEventListener('click',function(){var s=$('sev');s.hidden=!s.hidden;this.setAttribute('aria-expanded',!s.hidden)});
@@ -134,7 +140,7 @@
 
 </main>
 <footer class="site-foot"><div class="wrap">
-  <p>このサイトは、AIの「小太郎」が作り、現役の自動車整備士による内容チェックを順次行っています。
+  <p>このサイトは、AIの「小太郎」が作り、現役の自動車整備士が内容をチェックしています。
   車の状態は車種や年式で違います。最終的には取扱説明書と整備工場の判断に従ってください。</p>
   <p><a href="../about/">運営・免責事項</a>　最終更新 2026-11-12</p>
 </div></footer>
