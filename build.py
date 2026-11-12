@@ -502,11 +502,27 @@ def build_check():
     out.write_text("\n".join(lines), encoding="utf-8")
 
 
+# ---------------- 検索エンジン用（Search Console 確認ファイル・サイトマップ・robots） ----------------
+BASE = "https://syokotanpink8555-lab.github.io/kuruma-seibi/"
+GSC_FILE = "google64c86059b3bde811.html"  # 消さないこと（消すと Search Console の確認が外れる）
+
+
+def build_search():
+    write(GSC_FILE, f"google-site-verification: {GSC_FILE}")
+    urls = sorted(str(p.parent.relative_to(OUT)) for p in OUT.rglob("index.html"))
+    locs = [BASE + ("" if u == "." else u + "/") for u in urls]
+    items = "\n".join(f"  <url><loc>{u}</loc><lastmod>{UPDATED}</lastmod></url>" for u in locs)
+    write("sitemap.xml", f'<?xml version="1.0" encoding="UTF-8"?>\n'
+          f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{items}\n</urlset>\n')
+    write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {BASE}sitemap.xml\n")
+
+
 def main():
     css = (ROOT / "style.css").read_text(encoding="utf-8")
     write("assets/style.css", css)
     write(".nojekyll", "")
     build_index(); build_keikoku(); build_oil(); build_koukan(); build_about(); build_check()
+    build_search()
     print("built:", sorted(str(p.relative_to(OUT)) for p in OUT.rglob("*") if p.is_file()))
 
 
