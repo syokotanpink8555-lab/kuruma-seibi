@@ -192,8 +192,8 @@ def build_keikoku():
 def build_oil():
     body = """
 <h1>オイル交換時期の計算ツール</h1>
-<p class="lead">前回オイル交換した日と走行距離を入れると、次の交換の目安（日付と距離）を計算します。
-<b>「距離」と「期間」のどちらか早いほう</b>が交換のタイミングです。</p>
+<p class="lead">前回オイル交換した日と走行距離を入れると、次の交換の目安を計算します。
+現役の自動車整備士の基準で、<b>「おすすめの時期」</b>と<b>「遅くともここまで」</b>の2段階で表示します。</p>
 
 <form id="f" class="tool" onsubmit="return false">
   <label>車のタイプ
@@ -205,26 +205,9 @@ def build_oil():
       <option value="custom">自分で指定する（取扱説明書の数値など）</option>
     </select>
   </label>
-  <fieldset>
-    <legend>車の使い方</legend>
-    <label class="radio"><input type="radio" name="cond" value="normal" checked> ふつう</label>
-    <label class="radio"><input type="radio" name="cond" value="severe"> シビアコンディション
-      <button type="button" class="q" id="sev-btn" aria-expanded="false">これは何？</button></label>
-    <div id="sev" class="sev" hidden>
-      次のどれかに当てはまる使い方は、エンジンへの負担が大きい「シビアコンディション」です。
-      <ul>
-        <li>近所の買い物など、短い距離（1回8km以下が目安）の運転をくり返す</li>
-        <li>渋滞やのろのろ運転、アイドリングが多い</li>
-        <li>山道・坂道が多い（走行距離の3割以上が目安）</li>
-        <li>砂利道・雪道などの悪路が多い（走行距離の3割以上が目安）</li>
-        <li>1年に2万km以上走る</li>
-      </ul>
-      街乗り中心の車でも、当てはまることが少なくありません。
-    </div>
-  </fieldset>
   <div id="custom" class="row" hidden>
     <label>交換の距離（km）<input id="ckm" type="number" inputmode="numeric" min="500" step="500" value="5000"></label>
-    <label>交換の期間（ヶ月）<input id="cmo" type="number" inputmode="numeric" min="1" max="24" value="6"></label>
+    <label>交換の期間（ヶ月）<input id="cmo" type="number" inputmode="numeric" min="1" max="24" value="12"></label>
   </div>
   <div class="row">
     <label>前回交換した日<input id="date" type="date" required></label>
@@ -236,83 +219,94 @@ def build_oil():
 <div id="out" class="result" aria-live="polite" hidden></div>
 
 <section class="box">
-  <h2>目安の考え方（整備士のおすすめ）</h2>
-  <p>このツールの目安は、このサイトの内容をチェックしている現役の自動車整備士の意見をもとにしています。</p>
+  <h2>整備士の基準</h2>
   <table class="tbl">
-    <thead><tr><th>車のタイプ</th><th>ふつう</th><th>シビア</th></tr></thead>
+    <thead><tr><th>車のタイプ</th><th>おすすめ</th><th>遅くとも</th></tr></thead>
     <tbody>
-      <tr><td>ガソリン車（ターボなし・普通車）</td><td>10,000km または 1年</td><td>5,000km または 6ヶ月</td></tr>
-      <tr><td>軽自動車（ターボなし）</td><td>7,500km または 1年</td><td>5,000km または 6ヶ月</td></tr>
-      <tr><td>ターボ車（軽ターボ含む）</td><td>5,000km または 6ヶ月</td><td>2,500km または 3ヶ月</td></tr>
-      <tr><td>ディーゼル車</td><td>5,000km または 6ヶ月</td><td>2,500km または 3ヶ月</td></tr>
+      <tr><td>ガソリン車（ターボなし・普通車）</td><td>5,000km または 1年</td><td>10,000km</td></tr>
+      <tr><td>軽自動車（ターボなし）</td><td>5,000km または 1年</td><td>7,500km</td></tr>
+      <tr><td>ターボ車（軽ターボ含む）</td><td>2,500km または 6ヶ月</td><td>5,000km</td></tr>
+      <tr><td>ディーゼル車</td><td>2,500km または 6ヶ月</td><td>5,000km</td></tr>
     </tbody>
   </table>
+  <p class="small">1.5Lクラスのガソリン車を基準にした目安です。車種によって違うので、取扱説明書の指定も確認してください。</p>
+
   <h3>取扱説明書には「15,000km」と書いてあるけど？</h3>
   <p>国内メーカーの取扱説明書では、ターボなしのガソリン車で「15,000kmまたは1年」となっている車種も多くあります。
-  ただ、整備の現場から見ると15,000kmは遅すぎるというのが正直なところで、<b>車種にもよりますが、最低でも10,000kmでの交換</b>をおすすめします。
-  軽自動車はエンジンが小さく回転数が高くなりやすいので、それより少し早め、ターボ車はその半分くらいが目安です。</p>
-  <p>ディーゼル車は車種による違いが大きいので、取扱説明書の指定も必ず確認してください。
-  取扱説明書の数値で計算したい場合は「自分で指定する」を選んでください。</p>
+  ただ、整備の現場から見ると<b>15,000kmは遅すぎる</b>というのが正直なところです。
+  オイルが汚れたまま走るとエンジンの中が少しずつ削れ、そのスピードが早くなってエンジンの寿命を縮めます。
+  おすすめは5,000km、<b>どんなに遅くても10,000km</b>で交換してください。軽自動車はそれより少し早め、ターボ車はその半分くらいが目安です。</p>
+
+  <h3>「シビアコンディション」は気にしたほうがいい？</h3>
+  <p>取扱説明書には、短い距離の運転や渋滞が多い使い方（シビアコンディション）だと交換時期を短くするよう書かれています。
+  ただ、<b>1年ごとにきちんと替えていれば、そこまで気にしなくて大丈夫</b>です。たくさん走る人は、期間より距離で判断してください。</p>
+
+  <h3>自分の車に合った時期を知るには</h3>
+  <p>交換のときに、抜いたオイルの汚れ具合をお店の人に聞いてみてください。
+  汚れがひどければ次は早めに、きれいなら今のペースで大丈夫。何回か続けると、自分の乗り方と車に合った交換時期がわかってきます。</p>
+
   <h3>オイルエレメント（フィルター）は？</h3>
-  <p>オイル交換2回に1回の交換が一般的な目安です。</p>
+  <p>オイル交換2回に1回の交換が一般的な目安です。ただし、抜いたオイルにライトを当てても全く透けないほど汚れているときは、回数に関係なく交換したほうがいいです。</p>
+
   <h3>あまり走らないなら交換しなくていい？</h3>
-  <p>エンジンオイルは走らなくても時間とともに劣化します。距離が少なくても、期間の目安が来たら交換するのがおすすめです。</p>
+  <p>エンジンオイルは走らなくても時間とともに劣化します。距離が少なくても、1年たったら交換しましょう。</p>
 </section>
 
 <script>
 (function(){
-  var T={na:{normal:[10000,12],severe:[5000,6]},kei:{normal:[7500,12],severe:[5000,6]},turbo:{normal:[5000,6],severe:[2500,3]},diesel:{normal:[5000,6],severe:[2500,3]}};
+  // [おすすめkm, 遅くともkm, 期間(月)]
+  var T={na:[5000,10000,12],kei:[5000,7500,12],turbo:[2500,5000,6],diesel:[2500,5000,6]};
   var $=function(id){return document.getElementById(id)};
   var f=$('f'),out=$('out');
-  $('sev-btn').addEventListener('click',function(){var s=$('sev');s.hidden=!s.hidden;this.setAttribute('aria-expanded',!s.hidden)});
   function addMonths(d,m){var r=new Date(d.getFullYear(),d.getMonth()+m,d.getDate());if(r.getDate()!==d.getDate())r.setDate(0);return r}
   function fmt(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'}
   function n(v){return v===''?null:Math.max(0,Math.floor(Number(v)))}
   function c(x){return x.toLocaleString('ja-JP')}
   function run(){
-    var type=$('type').value,cond=f.querySelector('input[name=cond]:checked').value;
+    var type=$('type').value;
     $('custom').hidden=type!=='custom';
-    f.querySelectorAll('input[name=cond]').forEach(function(r){r.disabled=type==='custom'});
-    var km,mo;
-    if(type==='custom'){km=n($('ckm').value);mo=Math.min(n($('cmo').value)||0,36);if(!km||!mo){out.hidden=true;return}}
-    else{km=T[type][cond][0];mo=T[type][cond][1]}
+    var km,lim,mo;
+    if(type==='custom'){km=n($('ckm').value);mo=Math.min(n($('cmo').value)||0,36);lim=null;if(!km||!mo){out.hidden=true;return}}
+    else{km=T[type][0];lim=T[type][1];mo=T[type][2]}
     var dv=$('date').value;if(!dv){out.hidden=true;return}
     var p=dv.split('-'),d0=new Date(+p[0],p[1]-1,+p[2]);
     if(p.length!==3||isNaN(d0)){out.hidden=true;return}
     var today=new Date();today=new Date(today.getFullYear(),today.getMonth(),today.getDate());
     if(d0>today){out.innerHTML='<p class="st st-soon">前回交換日が未来の日付になっています。日付を確認してください。</p>';out.hidden=false;return}
     var due=addMonths(d0,mo),days=Math.round((due-today)/864e5);
-    var o0=n($('odo0').value),o1=n($('odo1').value);
+    var o0=n($('odo0').value),o1=n($('odo1').value),driven=null;
     var h='<h2>次のオイル交換の目安</h2><div class="due">';
     h+='<div><span>期間で</span><b>'+fmt(due)+'</b><small>'+(days>=0?'あと'+days+'日':Math.abs(days)+'日過ぎています')+'</small></div>';
-    var leftKm=null;
     if(o0!==null){
-      var dueKm=o0+km;
-      h+='<div><span>距離で</span><b>'+c(dueKm)+' km</b>';
+      h+='<div><span>距離で（おすすめ）</span><b>'+c(o0+km)+' km</b>';
+      if(lim)h+='<small>遅くとも '+c(o0+lim)+' km</small>';
       if(o1!==null&&o1<o0)h+='<small>今の走行距離が前回より小さくなっています。数字を確認してください。</small>';
-      if(o1!==null&&o1>=o0){leftKm=dueKm-o1;h+='<small>'+(leftKm>=0?'あと'+c(leftKm)+' km':c(-leftKm)+' km 超えています')+'</small>'}
+      if(o1!==null&&o1>=o0){driven=o1-o0;h+='<small>前回から '+c(driven)+' km 走行</small>'}
       h+='</div>';
     }
     h+='</div>';
-    var late=days<0||(leftKm!==null&&leftKm<0),soon=!late&&(days<=30||(leftKm!==null&&leftKm<=500));
-    var cls=late?'late':soon?'soon':'ok';
-    var msg=late?'交換の目安を過ぎています。早めに交換しましょう。':soon?'そろそろ交換の時期です。予約や準備をしておきましょう。':'まだ大丈夫です。どちらか早いほうを目安にしてください。';
-    if(o0!==null&&o1!==null&&o1>o0&&!late){
+    var over=days<0||(driven!==null&&lim!==null&&driven>=lim)||(driven!==null&&lim===null&&driven>=km);
+    var time=!over&&((driven!==null&&driven>=km)||days<=30);
+    var cls=over?'late':time?'soon':'ok';
+    var msg=over?'交換の時期を過ぎています。できるだけ早く交換しましょう。'
+      :time?'交換どきです。近いうちに交換しましょう。'
+      :'まだ大丈夫です。距離と期間のどちらか早いほうで交換してください。';
+    if(cls==='ok'&&driven!==null&&driven>0){
       var used=(today-d0)/864e5;
-      if(used>=14){var perDay=(o1-o0)/used,kmDay=Math.round(leftKm/perDay);
+      if(used>=14){var perDay=driven/used,kmDay=Math.round((km-driven)/perDay);
         if(kmDay<days){var pd=new Date(today.getTime()+kmDay*864e5);
-          if(kmDay<=30&&cls==='ok'){cls='soon';msg='そろそろ交換の時期です。予約や準備をしておきましょう。'}
-          msg+='<br>今のペース（1日約'+c(Math.round(perDay))+'km）だと、<b>'+fmt(pd)+'ごろ</b>に距離の目安に届きそうです。'}}
+          if(kmDay<=30){cls='soon';msg='もうすぐ交換どきです。予約や準備をしておきましょう。'}
+          msg+='<br>今のペース（1日約'+c(Math.round(perDay))+'km）だと、<b>'+fmt(pd)+'ごろ</b>におすすめの距離に届きそうです。'}}
     }
     h+='<p class="st st-'+cls+'">'+msg+'</p>';
-    h+='<p class="small">使った目安：'+c(km)+'km または '+mo+'ヶ月。取扱説明書の指定があればそちらを優先してください。</p>';
+    h+='<p class="small">使った目安：おすすめ '+c(km)+'km'+(lim?'（遅くとも '+c(lim)+'km）':'')+' または '+mo+'ヶ月。</p>';
     out.innerHTML=h;out.hidden=false;
   }
   f.addEventListener('input',run);f.addEventListener('change',run);run();
 })();
 </script>
 """
-    write("oil/index.html", page("オイル交換時期の計算ツール", "前回のオイル交換日と走行距離を入れるだけで、次のオイル交換の目安（日付・距離）を計算。ガソリン車・ターボ車・ディーゼル車、シビアコンディションに対応。", body))
+    write("oil/index.html", page("オイル交換時期の計算ツール", "前回のオイル交換日と走行距離を入れるだけで、次のオイル交換の目安を計算。現役整備士の基準で「おすすめ」と「遅くとも」の2段階表示。ガソリン車・軽自動車・ターボ車・ディーゼル車に対応。", body))
 
 
 # ---------------- このサイトについて ----------------
@@ -355,18 +349,11 @@ def build_check():
         if L["tip"]:
             lines.append(f"- ひとこと：{L['tip']}")
         lines.append("")
-    lines += ["## オイル交換ツールの目安（11/13 いただいた意見で変更）",
-              "- ガソリン（ターボなし・普通車）10,000km/1年、シビア 5,000km/6ヶ月",
-              "- 軽（ターボなし）7,500km/1年、シビア 5,000km/6ヶ月",
-              "- ターボ 5,000km/6ヶ月、シビア 2,500km/3ヶ月",
-              "- ディーゼル ターボと同じ（取説も確認するよう注記）",
-              "- エレメントは2回に1回",
-              "",
-              "## 小太郎が決めた部分（違っていたら一言ください。返事がなければこのまま）",
-              "- 軽の『もう少し少ない』は 7,500km にしました",
-              "- 期間（1年/6ヶ月/3ヶ月）とシビアの数字は、おすすめの距離に合わせて小太郎が決めました",
-              "- 充電警告灯：走ってOKにしたうえで『ハンドルが重い・水温計が上がる→ベルト切れかも→停車』だけ残しました",
-              "- レッカー＋代車の話は『保険によっては出ることがある、先に保険会社へ電話を』と書きました", ""]
+    lines += ["## オイル交換ツールの目安（優先度ルール表の基準に合わせた）",
+              "- ガソリン（ターボなし）おすすめ5,000km/1年・遅くとも10,000km",
+              "- 軽（ターボなし）おすすめ5,000km/1年・遅くとも7,500km",
+              "- ターボ・ディーゼル おすすめ2,500km/6ヶ月・遅くとも5,000km",
+              "- シビアコンディションの選択はなし（1年ごとに替えていれば気にしなくてよい）", ""]
     out = ROOT.parent.parent / "02_お願い" / "整備士チェック_警告灯とオイル.md"
     out.write_text("\n".join(lines), encoding="utf-8")
 
