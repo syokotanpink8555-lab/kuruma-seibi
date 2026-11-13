@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://syokotanpink8555-lab.github.io/kuruma-seibi/sitemap.xml
+Sitemap: https://seibi-note.com/sitemap.xml

@@ -503,11 +503,13 @@ def build_check():
 
 
 # ---------------- 検索エンジン用（Search Console 確認ファイル・サイトマップ・robots） ----------------
-BASE = "https://syokotanpink8555-lab.github.io/kuruma-seibi/"
+DOMAIN = "seibi-note.com"
+BASE = f"https://{DOMAIN}/"
 GSC_FILE = "google64c86059b3bde811.html"  # 消さないこと（消すと Search Console の確認が外れる）
 
 
 def build_search():
+    write("CNAME", DOMAIN + "\n")  # GitHub Pages の独自ドメイン
     write(GSC_FILE, f"google-site-verification: {GSC_FILE}")
     urls = sorted(str(p.parent.relative_to(OUT)) for p in OUT.rglob("index.html"))
     locs = [BASE + ("" if u == "." else u + "/") for u in urls]
