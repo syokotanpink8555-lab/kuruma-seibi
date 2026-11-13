@@ -206,7 +206,7 @@ def build_keikoku():
 OIL_P = dict(baseKm=4500, baseOil=3.7, oilExp=0.85, tireExp=0.9, kei=0.9,
              turbo=0.65, diesel=0.75, hv=1.5, city=0.8, old=0.8, lateMul=1.5,
              maxRec=10000, maxLate=12000)
-# 排気量(L) → オイル量(L・フィルター交換時)の目安（仮の表）
+# 排気量(L) → オイル量(L・フィルター交換時)の目安（11/14 整備士のオーナーさん確認済み：おおよその量として全タイプ共通でOK）
 OIL_TABLE = [[0.66, 2.9], [1.0, 3.2], [1.3, 3.4], [1.5, 3.7], [1.8, 4.2], [2.0, 4.4], [2.5, 4.8], [3.0, 5.5], [3.5, 6.0], [5.0, 7.0]]
 OIL_TYPE = {"na": "ガソリン", "turbo": "ターボ", "hv": "ハイブリッド", "diesel": "ディーゼル"}
 
@@ -398,7 +398,7 @@ def build_oil():
     var kei=d<=0.7;
     var g=guessOil(d),oil=num($('oil').value),oilGuess=!oil;
     if(!oil)oil=g;
-    $('oilhint').textContent='取扱説明書の「オイル容量（フィルター交換時）」を見ると正確です。空欄なら排気量からの目安（'+g+'L）で計算します。ターボ・ハイブリッド・ディーゼルは目安とずれやすいので、できれば入れてください';
+    $('oilhint').textContent='取扱説明書の「オイル容量（フィルター交換時）」を見ると正確です。空欄なら排気量からのおおよその量（'+g+'L）で計算します。取扱説明書の値を入れると、より正確になります';
     if(oil<1||oil>12)return {err:'オイル量を確認してください（例：3.7）'};
     var w=num($('tw').value),a=num($('ta').value),r=num($('tr').value),tireGuess=!(w&&a&&r);
     if(!tireGuess&&(w<125||w>335||a<25||a>85||r<10||r>24))return {err:'タイヤサイズを確認してください（例：175/65R15）'};

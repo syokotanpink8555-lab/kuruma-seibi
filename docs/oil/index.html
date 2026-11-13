@@ -167,7 +167,7 @@
     var kei=d<=0.7;
     var g=guessOil(d),oil=num($('oil').value),oilGuess=!oil;
     if(!oil)oil=g;
-    $('oilhint').textContent='取扱説明書の「オイル容量（フィルター交換時）」を見ると正確です。空欄なら排気量からの目安（'+g+'L）で計算します。ターボ・ハイブリッド・ディーゼルは目安とずれやすいので、できれば入れてください';
+    $('oilhint').textContent='取扱説明書の「オイル容量（フィルター交換時）」を見ると正確です。空欄なら排気量からのおおよその量（'+g+'L）で計算します。取扱説明書の値を入れると、より正確になります';
     if(oil<1||oil>12)return {err:'オイル量を確認してください（例：3.7）'};
     var w=num($('tw').value),a=num($('ta').value),r=num($('tr').value),tireGuess=!(w&&a&&r);
     if(!tireGuess&&(w<125||w>335||a<25||a>85||r<10||r>24))return {err:'タイヤサイズを確認してください（例：175/65R15）'};
