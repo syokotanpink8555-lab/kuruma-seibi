@@ -487,6 +487,15 @@ SHAKEN_SRC = [
 ]
 
 
+def wareki(y):
+    """車検証の表記（H25・R3）に合わせて和暦を先に出す"""
+    if y >= 2020:
+        return f"R{y - 2018}（{y}年）"
+    if y == 2019:
+        return "H31・R1（2019年）"
+    return f"H{y - 1988}（{y}年）"
+
+
 def build_shaken():
     import json
     S = SHAKEN
@@ -509,7 +518,7 @@ def build_shaken():
   <ul>
     <li>対象は<b>自家用の乗用車（普通・小型・軽）</b>だけです（新車から初回は3年、その後は2年ごとの車検）。事業用（緑・黒ナンバー）、貨物車（4ナンバー・軽バンなど）、沖縄県・離島は金額が違うので対象外です。</li>
     <li>法定費用は__ASOF__時点の金額です。お店の費用は、お店や車種によって幅があります。</li>
-    <li><b>部品の交換代は入っていません。</b>見積もりでは、ここに交換部品と工賃が足されます。</li>
+    <li><b>エンジンオイルなどの交換部品の代金と工賃は入っていません。</b>実際の車検代は、計算した金額に交換部品と工賃が足されたものになります。</li>
     <li>重量税の正確な金額は、車検証を見ながら国土交通省の「次回自動車重量税額照会サービス」（<a href="https://www.nextmvtt.mlit.go.jp/nextmvtt-web/" rel="noopener">登録車</a>／<a href="https://www.kei-nextmvtt.jp/kei_nextmvtt-web/" rel="noopener">軽自動車</a>）で調べられます。</li>
   </ul>
 </div>
@@ -526,7 +535,7 @@ def build_shaken():
   </label>
   <div class="row">
     <fieldset>
-      <legend>初度登録年月 <span class="opt">車検証の「初度登録年月」（軽は「初度検査年月」）</span></legend>
+      <legend>初度登録年月 <span class="opt">車検証の「初度登録年月」（軽は「初度検査年月」）。「H25」「R3」のように和暦で書いてあります</span></legend>
       <div style="display:flex;gap:6px">
         <select id="y1" aria-label="初度登録の年">__Y1__</select>
         <select id="m1" aria-label="初度登録の月">__M__</select>
@@ -658,8 +667,10 @@ def build_shaken():
     var legal=[tx[0]+jb+S.inshi[0],tx[1]+jb+S.inshi[1]];
     var ob=obd==='yes'?S.obd:obd==='no'?[0,0]:[0,S.obd[1]];
     var shop=[S.tenken[0]+S.kensa[0]+S.daikou[0]+ob[0],S.tenken[1]+S.kensa[1]+S.daikou[1]+ob[1]];
-    var h='<h2>車検費用の目安（部品代は別）</h2><div class="due">';
-    h+='<div><span>合計</span><b>'+rng(legal[0]+shop[0],legal[1]+shop[1])+'</b><small>ここに交換部品と工賃が足されます</small></div>';
+    var h='<h2>車検費用の目安</h2>';
+    h+='<div class="sev warn" style="margin-top:0"><b>⚠️ この金額で車検が終わるわけではありません。</b><br>下の金額に、<b>エンジンオイルなどの交換部品の代金と、その工賃</b>が足されます。何をどれだけ交換するかは車の状態しだいなので、実際の金額はお店の見積もりで確かめてください。</div>';
+    h+='<div class="due">';
+    h+='<div><span>車検の基本料金（交換部品・工賃は別）</span><b>'+rng(legal[0]+shop[0],legal[1]+shop[1])+'</b><small>＋ 交換部品の代金と工賃</small></div>';
     h+='<div><span>うち法定費用（どのお店でも同じ）</span><b>'+rng(legal[0],legal[1])+'</b></div></div>';
     h+='<table class="tbl" style="margin-top:12px"><tbody>';
     h+='<tr><td>自動車重量税（2年分）</td><td>'+rng(tx[0],tx[1])+'</td></tr>';
@@ -681,7 +692,8 @@ def build_shaken():
     $('out').innerHTML=h;
   }
   (function(){var d=new Date(),y=d.getFullYear(),s=$('y2'),h='';
-    for(var i=0;i<3;i++)h+='<option value="'+(y+i)+'">'+(y+i)+'年</option>';
+    function wa(n){return n>=2020?'R'+(n-2018)+'（'+n+'年）':n===2019?'H31・R1（2019年）':'H'+(n-1988)+'（'+n+'年）'}
+    for(var i=0;i<3;i++)h+='<option value="'+(y+i)+'">'+wa(y+i)+'</option>';
     s.innerHTML=h;s.value=String(y);$('m2').value=String(d.getMonth()+1)})();
   $('f').addEventListener('input',run);$('f').addEventListener('change',run);run();
 })();
@@ -689,8 +701,8 @@ def build_shaken():
 """
     import datetime
     y_now = datetime.date.today().year
-    rep0 = {"__Y1__": '<option value="">年</option>' + "".join(f'<option value="{y}">{y}年</option>' for y in range(y_now, 1989, -1)) + '<option value="1900">1989年以前</option>',
-            "__Y2__": "".join(f'<option value="{y}"{" selected" if y == y_now else ""}>{y}年</option>' for y in range(y_now, y_now + 3)),
+    rep0 = {"__Y1__": '<option value="">年</option>' + "".join(f'<option value="{y}">{wareki(y)}</option>' for y in range(y_now, 1989, -1)) + '<option value="1900">S64・H1（1989年）以前</option>',
+            "__Y2__": "".join(f'<option value="{y}"{" selected" if y == y_now else ""}>{wareki(y)}</option>' for y in range(y_now, y_now + 3)),
             "__M__": '<option value="">月</option>' + "".join(f'<option value="{m}">{m}月</option>' for m in range(1, 13)),
             "__M2__": "".join(f'<option value="{m}"{" selected" if m == datetime.date.today().month else ""}>{m}月</option>' for m in range(1, 13))}
     for k, v in rep0.items():

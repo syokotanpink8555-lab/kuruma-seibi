@@ -27,7 +27,7 @@
   <ul>
     <li>対象は<b>自家用の乗用車（普通・小型・軽）</b>だけです（新車から初回は3年、その後は2年ごとの車検）。事業用（緑・黒ナンバー）、貨物車（4ナンバー・軽バンなど）、沖縄県・離島は金額が違うので対象外です。</li>
     <li>法定費用は2026年11月13日時点の金額です。お店の費用は、お店や車種によって幅があります。</li>
-    <li><b>部品の交換代は入っていません。</b>見積もりでは、ここに交換部品と工賃が足されます。</li>
+    <li><b>エンジンオイルなどの交換部品の代金と工賃は入っていません。</b>実際の車検代は、計算した金額に交換部品と工賃が足されたものになります。</li>
     <li>重量税の正確な金額は、車検証を見ながら国土交通省の「次回自動車重量税額照会サービス」（<a href="https://www.nextmvtt.mlit.go.jp/nextmvtt-web/" rel="noopener">登録車</a>／<a href="https://www.kei-nextmvtt.jp/kei_nextmvtt-web/" rel="noopener">軽自動車</a>）で調べられます。</li>
   </ul>
 </div>
@@ -44,16 +44,16 @@
   </label>
   <div class="row">
     <fieldset>
-      <legend>初度登録年月 <span class="opt">車検証の「初度登録年月」（軽は「初度検査年月」）</span></legend>
+      <legend>初度登録年月 <span class="opt">車検証の「初度登録年月」（軽は「初度検査年月」）。「H25」「R3」のように和暦で書いてあります</span></legend>
       <div style="display:flex;gap:6px">
-        <select id="y1" aria-label="初度登録の年"><option value="">年</option><option value="2026">2026年</option><option value="2025">2025年</option><option value="2024">2024年</option><option value="2023">2023年</option><option value="2022">2022年</option><option value="2021">2021年</option><option value="2020">2020年</option><option value="2019">2019年</option><option value="2018">2018年</option><option value="2017">2017年</option><option value="2016">2016年</option><option value="2015">2015年</option><option value="2014">2014年</option><option value="2013">2013年</option><option value="2012">2012年</option><option value="2011">2011年</option><option value="2010">2010年</option><option value="2009">2009年</option><option value="2008">2008年</option><option value="2007">2007年</option><option value="2006">2006年</option><option value="2005">2005年</option><option value="2004">2004年</option><option value="2003">2003年</option><option value="2002">2002年</option><option value="2001">2001年</option><option value="2000">2000年</option><option value="1999">1999年</option><option value="1998">1998年</option><option value="1997">1997年</option><option value="1996">1996年</option><option value="1995">1995年</option><option value="1994">1994年</option><option value="1993">1993年</option><option value="1992">1992年</option><option value="1991">1991年</option><option value="1990">1990年</option><option value="1900">1989年以前</option></select>
+        <select id="y1" aria-label="初度登録の年"><option value="">年</option><option value="2026">R8（2026年）</option><option value="2025">R7（2025年）</option><option value="2024">R6（2024年）</option><option value="2023">R5（2023年）</option><option value="2022">R4（2022年）</option><option value="2021">R3（2021年）</option><option value="2020">R2（2020年）</option><option value="2019">H31・R1（2019年）</option><option value="2018">H30（2018年）</option><option value="2017">H29（2017年）</option><option value="2016">H28（2016年）</option><option value="2015">H27（2015年）</option><option value="2014">H26（2014年）</option><option value="2013">H25（2013年）</option><option value="2012">H24（2012年）</option><option value="2011">H23（2011年）</option><option value="2010">H22（2010年）</option><option value="2009">H21（2009年）</option><option value="2008">H20（2008年）</option><option value="2007">H19（2007年）</option><option value="2006">H18（2006年）</option><option value="2005">H17（2005年）</option><option value="2004">H16（2004年）</option><option value="2003">H15（2003年）</option><option value="2002">H14（2002年）</option><option value="2001">H13（2001年）</option><option value="2000">H12（2000年）</option><option value="1999">H11（1999年）</option><option value="1998">H10（1998年）</option><option value="1997">H9（1997年）</option><option value="1996">H8（1996年）</option><option value="1995">H7（1995年）</option><option value="1994">H6（1994年）</option><option value="1993">H5（1993年）</option><option value="1992">H4（1992年）</option><option value="1991">H3（1991年）</option><option value="1990">H2（1990年）</option><option value="1900">S64・H1（1989年）以前</option></select>
         <select id="m1" aria-label="初度登録の月"><option value="">月</option><option value="1">1月</option><option value="2">2月</option><option value="3">3月</option><option value="4">4月</option><option value="5">5月</option><option value="6">6月</option><option value="7">7月</option><option value="8">8月</option><option value="9">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option></select>
       </div>
     </fieldset>
     <fieldset>
       <legend>車検を受ける年月 <span class="opt">予定</span></legend>
       <div style="display:flex;gap:6px">
-        <select id="y2" aria-label="車検を受ける年"><option value="2026" selected>2026年</option><option value="2027">2027年</option><option value="2028">2028年</option></select>
+        <select id="y2" aria-label="車検を受ける年"><option value="2026" selected>R8（2026年）</option><option value="2027">R9（2027年）</option><option value="2028">R10（2028年）</option></select>
         <select id="m2" aria-label="車検を受ける月"><option value="1">1月</option><option value="2">2月</option><option value="3">3月</option><option value="4">4月</option><option value="5">5月</option><option value="6">6月</option><option value="7">7月</option><option value="8">8月</option><option value="9">9月</option><option value="10">10月</option><option value="11" selected>11月</option><option value="12">12月</option></select>
       </div>
     </fieldset>
@@ -183,8 +183,10 @@
     var legal=[tx[0]+jb+S.inshi[0],tx[1]+jb+S.inshi[1]];
     var ob=obd==='yes'?S.obd:obd==='no'?[0,0]:[0,S.obd[1]];
     var shop=[S.tenken[0]+S.kensa[0]+S.daikou[0]+ob[0],S.tenken[1]+S.kensa[1]+S.daikou[1]+ob[1]];
-    var h='<h2>車検費用の目安（部品代は別）</h2><div class="due">';
-    h+='<div><span>合計</span><b>'+rng(legal[0]+shop[0],legal[1]+shop[1])+'</b><small>ここに交換部品と工賃が足されます</small></div>';
+    var h='<h2>車検費用の目安</h2>';
+    h+='<div class="sev warn" style="margin-top:0"><b>⚠️ この金額で車検が終わるわけではありません。</b><br>下の金額に、<b>エンジンオイルなどの交換部品の代金と、その工賃</b>が足されます。何をどれだけ交換するかは車の状態しだいなので、実際の金額はお店の見積もりで確かめてください。</div>';
+    h+='<div class="due">';
+    h+='<div><span>車検の基本料金（交換部品・工賃は別）</span><b>'+rng(legal[0]+shop[0],legal[1]+shop[1])+'</b><small>＋ 交換部品の代金と工賃</small></div>';
     h+='<div><span>うち法定費用（どのお店でも同じ）</span><b>'+rng(legal[0],legal[1])+'</b></div></div>';
     h+='<table class="tbl" style="margin-top:12px"><tbody>';
     h+='<tr><td>自動車重量税（2年分）</td><td>'+rng(tx[0],tx[1])+'</td></tr>';
@@ -206,7 +208,8 @@
     $('out').innerHTML=h;
   }
   (function(){var d=new Date(),y=d.getFullYear(),s=$('y2'),h='';
-    for(var i=0;i<3;i++)h+='<option value="'+(y+i)+'">'+(y+i)+'年</option>';
+    function wa(n){return n>=2020?'R'+(n-2018)+'（'+n+'年）':n===2019?'H31・R1（2019年）':'H'+(n-1988)+'（'+n+'年）'}
+    for(var i=0;i<3;i++)h+='<option value="'+(y+i)+'">'+wa(y+i)+'</option>';
     s.innerHTML=h;s.value=String(y);$('m2').value=String(d.getMonth()+1)})();
   $('f').addEventListener('input',run);$('f').addEventListener('change',run);run();
 })();
