@@ -11,6 +11,7 @@ SITE = "くるま整備ノート"
 UPDATED = "2026-11-13"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
+CHECK_TXT_TODO = "現役の自動車整備士による内容チェックを順次行っています"
 CHECK_TXT = "一級自動車整備士・自動車検査員の資格をもつ現役の整備士がチェックしています" if REVIEWED else "現役の自動車整備士による内容チェックを順次行っています"
 
 COLOR = {"red": "赤", "yellow": "黄・オレンジ", "green": "緑", "blue": "青"}
@@ -23,8 +24,9 @@ LEVEL = {
 e = lambda s: html.escape(s, quote=True)
 
 
-def page(title, desc, body, depth=1, path=""):
+def page(title, desc, body, depth=1, path="", check_txt=None):
     up = "../" * depth
+    check = check_txt or CHECK_TXT
     full = SITE if not title else f"{title}｜{SITE}"
     return f"""<!doctype html>
 <html lang="ja">
@@ -41,13 +43,13 @@ def page(title, desc, body, depth=1, path=""):
 <body>
 <header class="site-head"><div class="wrap">
   <a class="logo" href="{up or './'}">🔧 {SITE}</a>
-  <nav><a href="{up}keikoku/">警告灯</a><a href="{up}oil/">オイル交換</a><a href="{up}koukan/">交換時期</a><a href="{up}about/">このサイトについて</a></nav>
+  <nav><a href="{up}keikoku/">警告灯</a><a href="{up}oil/">オイル交換</a><a href="{up}koukan/">交換時期</a><a href="{up}shaken/">車検費用</a><a href="{up}about/">このサイトについて</a></nav>
 </div></header>
 <main class="wrap">
 {body}
 </main>
 <footer class="site-foot"><div class="wrap">
-  <p>このサイトは、AIの「小太郎」が作り、{CHECK_TXT}。
+  <p>このサイトは、AIの「小太郎」が作り、{check}。
   車の状態は車種や年式で違います。最終的には取扱説明書と整備工場の判断に従ってください。</p>
   <p><a href="{up}about/">運営・免責事項</a>　最終更新 {UPDATED}</p>
 </div></footer>
@@ -84,6 +86,11 @@ def build_index():
     <span class="card-ic">🧰</span>
     <h2>消耗品の交換時期、整備士の本音</h2>
     <p>見積もりに並んだ交換、今やるべき？ ブレーキパッド・タイヤ・バッテリーなど16項目を3段階で。</p>
+  </a>
+  <a class="card" href="shaken/">
+    <span class="card-ic">📋</span>
+    <h2>車検費用の目安計算</h2>
+    <p>重量税・自賠責・印紙代は最新の公式の金額で。お店の費用は整備士に聞いた相場。見積もりのポイントも。</p>
   </a>
 </div>
 <section class="box">
@@ -455,6 +462,248 @@ def build_oil():
     write("oil/index.html", page("オイル交換時期の計算ツール", "排気量・オイル量・タイヤサイズと前回の交換日・走行距離から、次のオイル交換の目安を計算。現役の一級整備士の考え方で「おすすめ」と「遅くとも」の2段階表示。ガソリン・軽・ターボ・ハイブリッド・ディーゼルに対応。結果は目安です。", body))
 
 
+# ---------------- 車検費用 ----------------
+# 法定費用（2026-11-13 に一次資料で確認。改定されたらここを直す。メモ: 03_事業/05_車検費用ツール_法定費用メモ.md）
+SHAKEN = dict(
+    asof="2026年11月13日",
+    # 自動車重量税（継続検査・2年自家用）2026/5/1からの税額表（国交省）
+    # 普通・小型は 0.5t あたり、軽は1台あたり
+    tax={"futsu": {"free": 0, "eco": 5000, "no": 8200, "y13": 11400, "y18": 12600},
+         "kei": {"free": 0, "eco": 5000, "no": 6600, "y13": 8200, "y18": 8800}},
+    # 自賠責 24か月（2026/11/1以降に始まる契約、離島・沖縄県を除く）損害保険料率算出機構
+    jibai={"futsu": 18560, "kei": 18660},
+    jibai25={"futsu": 19070, "kei": 19170},
+    # 検査手数料（継続検査・保安基準適合証）2026/4/1〜 OSS 1,850円／窓口 2,100円
+    inshi=[1850, 2100],
+    # お店の費用（現役整備士の現場の声。幅で）
+    tenken=[20000, 25000], kensa=[10000, 15000], daikou=[0, 8800], obd=[2200, 4000],
+)
+SHAKEN_SRC = [
+    ("自動車重量税：国土交通省「2026年5月1日からの自動車重量税の税額表」", "https://www.mlit.go.jp/jidosha/content/001884517.pdf"),
+    ("自賠責保険：損害保険料率算出機構「自動車損害賠償責任保険基準料率（2026年4月30日届出）」", "https://www.giroj.or.jp/ratemaking/cali/pdf/202604_table.pdf"),
+    ("検査手数料：国土交通省「自動車の登録・検査の法定手数料変更について（令和8年4月1日）」", "https://www.mlit.go.jp/jidosha/content/001986066.pdf"),
+    ("OBD検査：国土交通省「OBD検査とは？（ユーザー向け）」", "https://www.mlit.go.jp/jidosha/jidosha_OBD_user.html"),
+    ("車検を受けられる期間：国土交通省 報道発表「車検を受けられる期間が延びます」", "https://www.mlit.go.jp/report/press/jidosha02_hh_000645.html"),
+]
+
+
+def build_shaken():
+    import json
+    S = SHAKEN
+    t, j = S["tax"], S["jibai"]
+    yen = lambda v: f"{v:,}円"
+    rows = "\n      ".join(
+        f"<tr><td>{lab}</td><td>{yen(t['futsu'][k])}</td><td>{yen(t['futsu'][k] * 3)}</td><td>{yen(t['kei'][k])}</td></tr>"
+        for k, lab in [("eco", "エコカー（本則税率）"), ("no", "エコカー以外（13年未満）"), ("y13", "13年経過"), ("y18", "18年経過")])
+    src = "\n    ".join(f'<li>{e(a)}<br><a href="{u}" rel="noopener">{u}</a></li>' for a, u in SHAKEN_SRC)
+    wopts = "".join(f'<option value="{i}"{" selected" if i == 3 else ""}>{f"{(i - 1) * 500 + 1:,}" if i > 1 else ""}{"〜" if i > 1 else ""}{i * 500:,}kg{"以下" if i == 1 else ""}</option>'
+                    for i in range(1, 7))
+    body = """
+<h1>車検費用の目安計算</h1>
+<p class="lead">車の種類・重さ・年数を選ぶと、車検にかかる費用の<b>目安</b>を計算します。
+国に払う<b>法定費用</b>（重量税・自賠責保険・印紙代）は公式の最新の金額で、<b>お店の費用</b>は現役の整備士に聞いた目安の幅で出します。<br>
+<span class="small">※このページの文章は、整備士のチェック前です。</span></p>
+
+<div class="sev warn">
+  <b>⚠️ このツールについて</b>
+  <ul>
+    <li>対象は<b>自家用の乗用車（普通・小型・軽）</b>だけです（新車から初回は3年、その後は2年ごとの車検）。事業用（緑・黒ナンバー）、貨物車（4ナンバー・軽バンなど）、沖縄県・離島は金額が違うので対象外です。</li>
+    <li>法定費用は__ASOF__時点の金額です。お店の費用は、お店や車種によって幅があります。</li>
+    <li><b>部品の交換代は入っていません。</b>見積もりでは、ここに交換部品と工賃が足されます。</li>
+    <li>重量税の正確な金額は、車検証を見ながら国土交通省の「次回自動車重量税額照会サービス」（<a href="https://www.nextmvtt.mlit.go.jp/nextmvtt-web/" rel="noopener">登録車</a>／<a href="https://www.kei-nextmvtt.jp/kei_nextmvtt-web/" rel="noopener">軽自動車</a>）で調べられます。</li>
+  </ul>
+</div>
+
+<form id="f" class="tool" onsubmit="return false">
+  <label>車の種類
+    <select id="kind">
+      <option value="futsu">普通車・小型車（白ナンバー）</option>
+      <option value="kei">軽自動車（黄色ナンバー）</option>
+    </select>
+  </label>
+  <label id="wl">車両重量 <span class="small" style="font-weight:400">車検証の「車両重量」。「車両総重量」ではありません</span>
+    <select id="w">__WOPTS__</select>
+  </label>
+  <div class="row">
+    <fieldset>
+      <legend>初度登録年月 <span class="opt">車検証の「初度登録年月」（軽は「初度検査年月」）</span></legend>
+      <div style="display:flex;gap:6px">
+        <select id="y1" aria-label="初度登録の年">__Y1__</select>
+        <select id="m1" aria-label="初度登録の月">__M__</select>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>車検を受ける年月 <span class="opt">予定</span></legend>
+      <div style="display:flex;gap:6px">
+        <select id="y2" aria-label="車検を受ける年">__Y2__</select>
+        <select id="m2" aria-label="車検を受ける月">__M2__</select>
+      </div>
+    </fieldset>
+  </div>
+  <p id="agemsg" class="small" style="margin:0"></p>
+  <div class="row">
+    <label id="ecol">エコカー減税
+      <select id="eco">
+        <option value="unknown">わからない</option>
+        <option value="eco">対象（本則税率）</option>
+        <option value="no">対象外</option>
+        <option value="free">免税（照会サービスで免税と出た）</option>
+      </select>
+    </label>
+  </div>
+  <label>OBD検査の対象 <span class="small" style="font-weight:400">車検証の備考欄に「OBD検査対象」と書いてあれば対象</span>
+    <select id="obd">
+      <option value="unknown">わからない</option>
+      <option value="yes">対象（書いてある）</option>
+      <option value="no">対象外（書いていない）</option>
+    </select>
+  </label>
+</form>
+
+<div id="out" class="result" aria-live="polite"></div>
+
+<section class="box">
+  <h2>車検費用の中身</h2>
+  <p>車検費用は、大きく分けて<b>法定費用</b>（どのお店でも同じ）と<b>お店の費用</b>（お店で違う）、そして<b>部品の交換代</b>の3つです。</p>
+  <h3>法定費用（__ASOF__時点）</h3>
+  <ul>
+    <li><b>自賠責保険（24か月）</b>：普通・小型 __J_F__／軽 __J_K__。2026年11月1日以降に始まる契約から値上がりしました。お店によっては25か月で入ることがあり、その場合は少し高くなります（普通・小型 __J25_F__／軽 __J25_K__）。</li>
+    <li><b>印紙代（検査手数料）</b>：ディーラーや整備工場（指定工場）で受けるときは 1,850円〜2,100円（オンライン申請か窓口かで違います）。指定工場でない整備工場やユーザー車検（持込検査）では、普通車2,600円・小型車と軽2,500円です。2026年4月1日に上がりました（このツールは指定工場の金額で計算）。</li>
+    <li><b>自動車重量税（2年分）</b>：車の重さと年数、エコカーかどうかで決まります（下の表）。</li>
+  </ul>
+  <table class="tbl">
+    <thead><tr><th>重量税（2年分）</th><th>普通・小型 0.5tごと</th><th>例：1.5tまで</th><th>軽自動車</th></tr></thead>
+    <tbody>
+      __ROWS__
+    </tbody>
+  </table>
+  <p class="small">2026年5月1日からの税額。普通・小型は初度登録年月から12年10か月以後、軽は初度検査年から13年たった年の11月以後に受ける車検から「13年経過」の税額になります（18年も同じ考え方）。エコカー減税で免税になる車もあります。ハイブリッド車・電気自動車などは、13年を過ぎても重量税が上がらない場合があります。年数の長い車は照会サービスで確かめるのが確実です。</p>
+  <h3>お店の費用（現役の整備士に聞いた目安）</h3>
+  <ul>
+    <li><b>24か月点検</b>：2万円ちょっと（車種によって違います。このツールでは20,000〜25,000円で計算）</li>
+    <li><b>検査費用</b>：1万円ちょっと（このツールでは10,000〜15,000円で計算）</li>
+    <li><b>代行手数料</b>：8,800円の例があります（名前や金額はお店によって違います。このツールでは0円〜8,800円の幅にしています）</li>
+    <li><b>OBD検査料</b>：2,200円くらいのお店から4,000円くらいのお店まで。<b>OBD検査の対象の車だけ</b>にかかります</li>
+  </ul>
+  <p class="small">このツールでは、上の幅をそのまま足しています。大きなお店は税込で書いていることがほとんどですが、見積もりが税込かどうかは一応確認してください。</p>
+</section>
+
+<section class="box">
+  <h2>見積もりを見るときのポイント（現役の整備士の声）</h2>
+  <h3>よく足される交換部品</h3>
+  <p>スタビライザーリンク、ブーツ類（タイロッドエンドブーツ・ロワアームブーツ・ドライブシャフトブーツなど）、ブレーキパッドは、車検の見積もりによく入ってきます。
+  今やるべきかは<a href="../koukan/">消耗品の交換時期、整備士の本音</a>も参考にしてください。</p>
+  <h3>タイヤとバッテリーは先に下調べを</h3>
+  <p>タイヤとバッテリーは、車検でほぼ必ず見られます。車検の当日に交換をすすめられると、「ほかの銘柄がよかった」と選び直すのが難しくなります。
+  車検の前に、お店で状態を聞いておくか自分で見ておいて、付けたいものがあれば値段も含めて下調べしておくと安心です。</p>
+  <h3>「今回はやらなくていい」と言いやすいもの</h3>
+  <p>洗車関係や添加剤類は、必要なければ断っても車検には関係ありません。</p>
+  <p>ただし、<b>下回りの洗浄</b>は洗車とは別に考えてください。ゴム部品を長持ちさせられるので、やったほうがいいものです（別料金で6,000円くらいのお店もあります）。
+  <b>海の近くや、冬に融雪剤（塩カル）をまく地域</b>では、<b>下回りの防錆</b>もやっておくのがおすすめです。錆びてしまってからでは元に戻せません。</p>
+  <h3>OBD検査の対象外なのに、検査料が入っていないか</h3>
+  <p>OBD検査の対象は、2021年10月1日以降（輸入車は2022年10月1日以降）にフルモデルチェンジした新しい型の車などです。車検証の備考欄に「OBD検査対象」と書いてあれば対象です。
+  対象ではないのにOBD検査料が入っていた例もあるので、見積もりに入っていたら確かめてみてください。</p>
+  <h3>代車</h3>
+  <p>代車は無料のお店が多いですが、お店の好意で用意してもらっているものです。台数に限りがあるので、早めに予約しておくと安心です。</p>
+</section>
+
+<section class="box">
+  <h2>新車保証が残っているうちは、買ったお店で</h2>
+  <p>新車には、一般的に3年（主要な部品は5年）のメーカー保証がついています（期間や条件はメーカーや車で違うので、保証書で確認してください）。保証が残っているうちは、安さだけで選んで、買ったお店以外に車検や点検を出すのはあまりおすすめしません（同じメーカーのディーラーなら保証は使えます）。
+  <b>保証で直せたはずの部品を、有料で交換していた</b>ということがたまに起きるからです。</p>
+  <p>1年ごとの点検もきちんと受けておきましょう。車検の当日に不具合を伝えても、症状によっては保証が使えない場合があります。</p>
+</section>
+
+<section class="box">
+  <h2>そのほかに知っておきたいこと</h2>
+  <ul>
+    <li>車検は、有効期間が切れる日の<b>2か月前から</b>受けても、次の有効期間は短くなりません（2025年4月1日から。それまでは1か月前からでした）。年度末はお店が混むので、早めの予約がおすすめです。</li>
+  </ul>
+</section>
+
+<section class="box">
+  <h2>このページの情報のもと</h2>
+  <ul>
+    __SRC__
+  </ul>
+  <p class="small">法定費用は、AIの小太郎が上の公式資料で確認しました。お店の費用と見積もりのポイントは、現役の整備士に聞いた現場の声をもとにしています。このページの文章の整備士チェックはこれからです。</p>
+</section>
+
+<script>
+(function(){
+  var S=__S__;
+  var $=function(id){return document.getElementById(id)};
+  function c(x){return x.toLocaleString('ja-JP')+'円'}
+  function rng(a,b){return a===b?c(a):c(a)+'〜'+c(b)}
+  function run(){
+    var kind=$('kind').value,eco=$('eco').value,obd=$('obd').value;
+    var y1=Number($('y1').value),m1=Number($('m1').value),y2=Number($('y2').value),m2=Number($('m2').value),age='lt13',am='';
+    if(y1===1900){age='y18';am='→ この車検は「18年経過」の重量税になります。'}
+    else if(y1&&m1){
+      // 国交省：普通・小型は初度登録年月から12年10か月以後、軽は初度検査年から13年たった年の11月以後に受ける車検から（18年も同じ）
+      function over(n){return kind==='kei'?(y2>y1+n||(y2===y1+n&&m2>=11)):((y2*12+m2)-(y1*12+m1)>=n*12-2)}
+      if((y2*12+m2)<(y1*12+m1)){am='車検を受ける年月が、初度登録年月より前になっています。'}
+      else{age=over(18)?'y18':over(13)?'y13':'lt13';
+        am=age==='y18'?'→ この車検は「18年経過」の重量税になります。':age==='y13'?'→ この車検は「13年経過」の重量税になります。':'→ この車検は、13年経過の前の重量税です。'}
+    }else{am='初度登録の年と月を選ぶと、13年・18年経過の重量税かどうかも自動で判定します（選ばないときは13年経過の前として計算）。'}
+    $('agemsg').textContent=am;
+    var kei=kind==='kei';
+    $('wl').hidden=kei; $('ecol').hidden=age!=='lt13';
+    var units=kei?1:Number($('w').value);
+    var T=S.tax[kind],tx;
+    if(age!=='lt13'){tx=[T[age]*units,T[age]*units]}
+    else if(eco==='unknown'){tx=[T.eco*units,T.no*units]}
+    else{tx=[T[eco]*units,T[eco]*units]}
+    var jb=S.jibai[kind];
+    var legal=[tx[0]+jb+S.inshi[0],tx[1]+jb+S.inshi[1]];
+    var ob=obd==='yes'?S.obd:obd==='no'?[0,0]:[0,S.obd[1]];
+    var shop=[S.tenken[0]+S.kensa[0]+S.daikou[0]+ob[0],S.tenken[1]+S.kensa[1]+S.daikou[1]+ob[1]];
+    var h='<h2>車検費用の目安（部品代は別）</h2><div class="due">';
+    h+='<div><span>合計</span><b>'+rng(legal[0]+shop[0],legal[1]+shop[1])+'</b><small>ここに交換部品と工賃が足されます</small></div>';
+    h+='<div><span>うち法定費用（どのお店でも同じ）</span><b>'+rng(legal[0],legal[1])+'</b></div></div>';
+    h+='<table class="tbl" style="margin-top:12px"><tbody>';
+    h+='<tr><td>自動車重量税（2年分）</td><td>'+rng(tx[0],tx[1])+'</td></tr>';
+    h+='<tr><td>自賠責保険（24か月）</td><td>'+c(jb)+'</td></tr>';
+    h+='<tr><td>印紙代（検査手数料）</td><td>'+rng(S.inshi[0],S.inshi[1])+'</td></tr>';
+    h+='<tr><td>24か月点検</td><td>'+rng(S.tenken[0],S.tenken[1])+'</td></tr>';
+    h+='<tr><td>検査費用</td><td>'+rng(S.kensa[0],S.kensa[1])+'</td></tr>';
+    h+='<tr><td>代行手数料</td><td>'+rng(S.daikou[0],S.daikou[1])+'</td></tr>';
+    h+='<tr><td>OBD検査料</td><td>'+(obd==='no'?'かからない':rng(ob[0],ob[1]))+'</td></tr>';
+    h+='</tbody></table>';
+    var notes=[];
+    if(age==='lt13'&&eco==='unknown')notes.push('エコカー減税がわからないので、重量税は「エコカー（本則税率）」から「エコカー以外」までの幅で出しています。免税の車もあります。');
+    if(age!=='lt13')notes.push('ハイブリッド車・電気自動車などは、13年を過ぎても重量税が上がらない場合があります。照会サービスで確かめると確実です。');
+    if(obd==='unknown')notes.push('OBD検査の対象かわからないので、OBD検査料は0円〜'+c(S.obd[1])+'の幅にしています。車検証の備考欄を見てみてください。');
+    if(obd==='no')notes.push('OBD検査の対象外なら、見積もりにOBD検査料が入っていないか確認しましょう。');
+    notes.push('タイヤとバッテリーは、車検の前に状態を聞いて下調べしておくと、当日あわてずにすみます。');
+    h+='<ul class="small">'+notes.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';
+    h+='<p class="small">※ あくまで目安です。法定費用は'+S.asof+'時点の金額（自賠責は離島・沖縄県を除く）。お店の費用はお店や車種によって違います。</p>';
+    $('out').innerHTML=h;
+  }
+  (function(){var d=new Date(),y=d.getFullYear(),s=$('y2'),h='';
+    for(var i=0;i<3;i++)h+='<option value="'+(y+i)+'">'+(y+i)+'年</option>';
+    s.innerHTML=h;s.value=String(y);$('m2').value=String(d.getMonth()+1)})();
+  $('f').addEventListener('input',run);$('f').addEventListener('change',run);run();
+})();
+</script>
+"""
+    import datetime
+    y_now = datetime.date.today().year
+    rep0 = {"__Y1__": '<option value="">年</option>' + "".join(f'<option value="{y}">{y}年</option>' for y in range(y_now, 1989, -1)) + '<option value="1900">1989年以前</option>',
+            "__Y2__": "".join(f'<option value="{y}"{" selected" if y == y_now else ""}>{y}年</option>' for y in range(y_now, y_now + 3)),
+            "__M__": '<option value="">月</option>' + "".join(f'<option value="{m}">{m}月</option>' for m in range(1, 13)),
+            "__M2__": "".join(f'<option value="{m}"{" selected" if m == datetime.date.today().month else ""}>{m}月</option>' for m in range(1, 13))}
+    for k, v in rep0.items():
+        body = body.replace(k, v)
+    rep = {"__ROWS__": rows, "__SRC__": src, "__WOPTS__": wopts, "__ASOF__": S["asof"],
+           "__J_F__": yen(j["futsu"]), "__J_K__": yen(j["kei"]),
+           "__J25_F__": yen(S["jibai25"]["futsu"]), "__J25_K__": yen(S["jibai25"]["kei"]),
+           "__S__": json.dumps(S, ensure_ascii=False)}
+    for k, v in rep.items():
+        body = body.replace(k, v)
+    write("shaken/index.html", page("車検費用の目安計算", "自家用の普通車・軽自動車の車検費用の目安を計算。重量税・自賠責保険・印紙代は2026年11月時点の公式の金額、お店の費用は現役の整備士に聞いた目安。見積もりを見るときのポイントも。", body, check_txt=CHECK_TXT_TODO))
+
+
 # ---------------- 消耗品の交換時期 ----------------
 LV3 = [("red", "🔴 今すぐ"), ("yellow", "🟡 近いうちに"), ("white", "⚪ 様子見でいい")]
 
@@ -665,7 +914,7 @@ def main():
     css = (ROOT / "style.css").read_text(encoding="utf-8")
     write("assets/style.css", css)
     write(".nojekyll", "")
-    build_index(); build_keikoku(); build_oil(); build_koukan(); build_about(); build_check()
+    build_index(); build_keikoku(); build_oil(); build_koukan(); build_shaken(); build_about(); build_check()
     build_search()
     print("built:", sorted(str(p.relative_to(OUT)) for p in OUT.rglob("*") if p.is_file()))
 
