@@ -95,3 +95,7 @@ ol li{margin:4px 0}
 @media(max-width:480px){.tbl{font-size:13px}.tbl th,.tbl td{padding:5px}}
 .lg.c-white{background:var(--card);border:1px solid var(--line)}
 .sev.warn{background:var(--yel-bg);margin:12px 0}
+.pr{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px}
+.ad{border-style:dashed}
+.ad-label{display:inline-block;font-size:12px;font-weight:700;padding:1px 10px;border-radius:99px;background:var(--line);color:var(--ink);margin:12px 0 0}
+.ad h2{margin-top:6px}

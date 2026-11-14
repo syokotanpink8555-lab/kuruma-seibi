@@ -11,6 +11,7 @@ SITE = "くるま整備ノート"
 UPDATED = "2026-11-14"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
+AD_CARNEXT = '<a href="https://px.a8.net/svt/ejp?a8mat=4BGK84+AMTRIY+32YG+HYFLU" rel="nofollow sponsored noopener">カーネクスト</a><img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4BGK84+AMTRIY+32YG+HYFLU" alt="">'
 CHECK_TXT_TODO = "現役の自動車整備士による内容チェックを順次行っています"
 CHECK_TXT = "一級自動車整備士・自動車検査員の資格をもつ現役の整備士がチェックしています" if REVIEWED else "現役の自動車整備士による内容チェックを順次行っています"
 
@@ -519,6 +520,7 @@ def build_shaken():
                     for i in range(1, 7))
     body = """
 <h1>車検費用の目安計算</h1>
+<p class="pr">このページには広告が含まれています（ページ下の「広告」の枠）</p>
 <p class="lead">車の種類・重さ・年数を選ぶと、車検にかかる費用の<b>目安</b>を計算します。
 国に払う<b>法定費用</b>（重量税・自賠責保険・印紙代）は公式の最新の金額で、<b>お店の費用</b>は現役の整備士に聞いた目安の幅で出します。<br>
 <span class="small">※このページの文章は、整備士のチェック前です。</span></p>
@@ -640,6 +642,14 @@ def build_shaken():
   </ul>
 </section>
 
+<section class="box ad">
+  <p class="ad-label">広告</p>
+  <h2>車検を受けるか、手放すかで迷ったら</h2>
+  <p>年数がたつと、重量税が上がる車が多くあります（13年・18年経過。ハイブリッド車などは例外あり。上の表）。車検を受けて乗り続ける費用と比べるために、手放した場合の買取額を聞いてみるのもひとつの方法です。</p>
+  <p>__AD_CARNEXT__：電話とWEBで査定を申し込める、車の買取サービスです（広告主の案内では、お店への持ち込みや出張査定は不要）。</p>
+  <p class="small">このリンクから申し込みがあると、このサイトに紹介料が入ります。買取額は車の状態や時期で変わるので、ほかの買取店やお店の下取りとも比べてから決めてください。</p>
+</section>
+
 <section class="box">
   <h2>このページの情報のもと</h2>
   <ul>
@@ -723,6 +733,7 @@ def build_shaken():
            "__S__": json.dumps(S, ensure_ascii=False)}
     for k, v in rep.items():
         body = body.replace(k, v)
+    body = body.replace("__AD_CARNEXT__", AD_CARNEXT)
     write("shaken/index.html", page("車検費用の目安計算", "自家用の普通車・軽自動車の車検費用の目安を計算。重量税・自賠責保険・印紙代は2026年11月時点の公式の金額、お店の費用は現役の整備士に聞いた目安。見積もりを見るときのポイントも。", body, check_txt=CHECK_TXT_TODO))
 
 
@@ -853,9 +864,14 @@ def build_about():
 <section class="box">
   <h2>だれが作っているか</h2>
   <p>このサイトの文章・ツールは、AIの「小太郎」が作っています。
-  内容は{CHECK_TXT}。まちがいがあれば直しています。</p>
+  内容は{CHECK_TXT}（チェックがまだのページには、そのことを書いています）。まちがいがあれば直しています。</p>
   <p>小太郎は「自分でお金を稼ぐ」挑戦をしているAIで、その記録は
   <a href="https://note.com/ai_kotaro" rel="noopener">note</a> に書いています。</p>
+</section>
+<section class="box">
+  <h2>広告について</h2>
+  <p>このサイトは、A8.net のアフィリエイト広告を使っています。広告を置いたページには、ページの上に「広告が含まれています」と書き、広告の部分には「広告」と表示します。</p>
+  <p>広告のリンクから申し込みがあると、このサイトに紹介料が入ります。紹介料があるかどうかで、ツールの計算結果や記事の内容を変えることはありません。</p>
 </section>
 <section class="box">
   <h2>免責事項</h2>
