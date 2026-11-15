@@ -8,7 +8,7 @@ from data_koukan import ITEMS, CATS, CHECK_ALWAYS, ADDITIVES
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "くるま整備ノート"
-UPDATED = "2026-11-14"
+UPDATED = "2026-11-15"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
 AD_CARNEXT = '<a href="https://px.a8.net/svt/ejp?a8mat=4BGK84+AMTRIY+32YG+HYFLU" rel="nofollow sponsored noopener">カーネクスト</a><img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4BGK84+AMTRIY+32YG+HYFLU" alt="">'
@@ -117,7 +117,7 @@ def build_keikoku():
 <article class="light c-{L['color']}" id="{L['id']}" data-color="{L['color']}" data-kw="{e(L['name'] + ' ' + L['keywords'] + ' ' + L['look'])}">
   <div class="light-head">
     <span class="dot" aria-hidden="true"></span>
-    <h2>{e(L['name'])}</h2>
+    <h2><a href="{L['id']}/">{e(L['name'])}</a></h2>
     <span class="badge b-{L['level']}">{lv}</span>
   </div>
   <p class="look">見た目：{e(L['look'])}（色：{COLOR[L['color']]}）</p>
@@ -762,7 +762,7 @@ def build_koukan():
         alias = f'<p class="look">別の書き方：{e(it["alias"])}</p>' if it["alias"] else ""
         items.append(f"""
 <article class="part" id="{it['id']}" data-cat="{it['cat']}" data-kw="{e(it['name'] + ' ' + it['alias'])}">
-  <div class="light-head"><h2>{e(it['name'])}</h2><span class="badge b-info">{CATS[it['cat']]}</span></div>
+  <div class="light-head"><h2><a href="{it['id']}/">{e(it['name'])}</a></h2><span class="badge b-info">{CATS[it['cat']]}</span></div>
   {alias}
   <p class="honne"><span>整備士の本音</span>{e(it['honne'])}</p>
   <table class="lv">{rows}</table>
@@ -864,6 +864,106 @@ def build_koukan():
           "ブレーキパッド・タイヤ・バッテリー・CVTフルードなど、見積もりに出てくる消耗品16項目の交換時期を、現役の一級整備士の基準で「今すぐ／近いうちに／様子見」の3段階に。お店に聞くといい質問も。", body))
 
 
+
+# ---------------- 個別ページ（検索の入口。中身は一覧と同じ、チェック済みのデータだけを使う） ----------------
+DIESEL_IDS = {"glow", "dpf"}
+DIESEL_TXT = "現役の整備士がチェックしています。ただし、ディーゼル車の内容は、その整備士の専門外です"
+
+
+def build_keikoku_pages():
+    for L in LIGHTS:
+        lv, lvdesc = LEVEL[L["level"]]
+        acts = "".join(f"<li>{e(a)}</li>" for a in L["action"])
+        tip = f'<p class="tip">💡 {e(L["tip"])}</p>' if L["tip"] else ""
+        diesel = L["id"] in DIESEL_IDS
+        dnote = ('<p class="small">※ ディーゼル車は、このサイトをチェックしている整備士の専門外です。'
+                 'とくに参考程度にして、取扱説明書を優先してください。</p>') if diesel else ""
+        rel = [x for x in LIGHTS if x["color"] == L["color"] and x["id"] != L["id"]]
+        rel = "".join(f'<li><a href="../{x["id"]}/"><span class="dot dot-{x["color"]}"></span>{e(x["name"])}</a></li>' for x in rel)
+        body = f"""
+<p class="crumb"><a href="../../">トップ</a> ＞ <a href="../">警告灯の意味一覧</a></p>
+<article class="light c-{L['color']}">
+  <div class="light-head">
+    <span class="dot" aria-hidden="true"></span>
+    <h1>{e(L['name'])}が点いたら</h1>
+    <span class="badge b-{L['level']}">{lv}</span>
+  </div>
+  <p class="look">見た目：{e(L['look'])}（色：{COLOR[L['color']]}）</p>
+  <p class="meaning">{e(L['meaning'])}</p>
+  <h2>どうすればいい？</h2>
+  <ul>{acts}</ul>
+  {tip}
+  {dnote}
+</article>
+
+<section class="box">
+  <h2>色でわかる緊急度</h2>
+  <p>このランプは<b>{COLOR[L['color']]}</b>（{lv}：{lvdesc}）です。</p>
+  <ul>
+    <li><b>赤</b>：すぐに安全な場所に停めて確認・相談</li>
+    <li><b>黄・オレンジ</b>：すぐ止まらなくてよいことが多いが、早めに点検</li>
+    <li><b>緑・青</b>：装置が作動中などのお知らせ（異常ではない）</li>
+  </ul>
+  <p>「走れる」警告灯でも、運転するのが不安なときは無理に走らず、レッカーを呼ぶのも手です（<a href="../#tow">レッカーという選択肢</a>）。</p>
+</section>
+
+<section class="box">
+  <h2>同じ色のほかの警告灯</h2>
+  <ul class="rel">{rel}</ul>
+  <p><a href="../">→ 警告灯の意味一覧（{len(LIGHTS)}種類・検索つき）</a></p>
+</section>
+<p class="small">マークの形や色は車種によって異なることがあります。正確な意味は取扱説明書で確認してください。</p>
+"""
+        desc = f"{L['name']}（{L['look']}）が点いたときの意味と、まずやること。{L['meaning']}"
+        write(f"keikoku/{L['id']}/index.html",
+              page(f"{L['name']}が点いたら｜意味と対処", desc[:120], body, depth=2,
+                   check_txt=DIESEL_TXT if diesel else None))
+
+
+def build_koukan_pages():
+    for it in ITEMS:
+        rows = "".join(
+            f'<tr class="lv-{k}"><th>{lab}</th><td>{"<br>".join(e(x) for x in it[k])}</td></tr>'
+            for k, lab in LV3 if it[k])
+        ask = "".join(f"<li>{e(a)}</li>" for a in it["ask"])
+        ask = f'<h2>お店に聞くといい質問</h2><ul class="ask">{ask}</ul>' if ask else ""
+        note = it.get("note", "")
+        note = note.replace('href="../', 'href="../../') if it.get("html_note") else e(note)
+        note = f'<p class="tip">💡 {note}</p>' if note else ""
+        alias = f'<p class="look">別の書き方：{e(it["alias"])}</p>' if it["alias"] else ""
+        rel = [x for x in ITEMS if x["cat"] == it["cat"] and x["id"] != it["id"]]
+        rel = "".join(f'<li><a href="../{x["id"]}/">{e(x["name"])}の交換時期</a></li>' for x in rel)
+        rel = f'<h2>同じ種類のほかの項目（{CATS[it["cat"]]}）</h2><ul class="rel">{rel}</ul>' if rel else ""
+        body = f"""
+<p class="crumb"><a href="../../">トップ</a> ＞ <a href="../">消耗品の交換時期、整備士の本音</a></p>
+<article class="part">
+  <div class="light-head"><h1>{e(it['name'])}の交換時期</h1><span class="badge b-info">{CATS[it['cat']]}</span></div>
+  {alias}
+  <p class="honne"><span>整備士の本音</span>{e(it['honne'])}</p>
+  <h2>交換の目安（整備士の基準）</h2>
+  <table class="lv">{rows}</table>
+  <h2>放っておくと</h2>
+  <p>{e(it['risk'])}</p>
+  {ask}
+  {note}
+  <p class="gen"><b>一般的な目安（AIの小太郎が調べたもの）：</b>{e(it['general'])}</p>
+</article>
+
+<section class="box">
+  <h2>見積もりを見るときのコツ</h2>
+  <ul>
+    <li><b>数字で聞く。</b>「そろそろ交換です」ではなく、「残り何mm？」「何年前に替えた？」と聞くと、自分で判断できます。</li>
+    <li><b>やる・やらないは、説明を聞いて自分で決める。</b>説明がなかったら「替えないとどうなりますか？」と聞いてみてください。ただし🔴の項目、とくにブレーキとタイヤは先延ばしにしないでください。</li>
+  </ul>
+  {rel}
+  <p><a href="../">→ 消耗品{len(ITEMS)}項目の一覧（今すぐ・近いうちに・様子見）</a>　<a href="../../shaken/">→ 車検費用の目安計算</a></p>
+</section>
+<p class="small">交換時期は車種・年式・使い方で変わります。自分の車の指定は、取扱説明書とメンテナンスノートで確認してください。</p>
+"""
+        desc = f"{it['name']}の交換時期を、現役の一級整備士の基準で「今すぐ・近いうちに・様子見」に。整備士の本音：{it['honne']}"
+        write(f"koukan/{it['id']}/index.html",
+              page(f"{it['name']}の交換時期｜整備士の基準", desc[:120], body, depth=2))
+
 # ---------------- このサイトについて ----------------
 def build_about():
     body = f"""
@@ -959,7 +1059,7 @@ def main():
     css = (ROOT / "style.css").read_text(encoding="utf-8")
     write("assets/style.css", css)
     write(".nojekyll", "")
-    build_index(); build_keikoku(); build_oil(); build_koukan(); build_shaken(); build_about(); build_check()
+    build_index(); build_keikoku(); build_keikoku_pages(); build_oil(); build_koukan(); build_koukan_pages(); build_shaken(); build_about(); build_check()
     build_search()
     print("built:", sorted(str(p.relative_to(OUT)) for p in OUT.rglob("*") if p.is_file()))
 
