@@ -8,6 +8,9 @@ from data_koukan import ITEMS, CATS, CHECK_ALWAYS, ADDITIVES
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "くるま整備ノート"
+DOMAIN = "seibi-note.com"
+BASE = f"https://{DOMAIN}/"
+URL_MARK = "__PAGE_URL__"  # write() がページのURLに置きかえる
 UPDATED = "2026-11-16"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
@@ -39,6 +42,11 @@ def page(title, desc, body, depth=1, path="", check_txt=None):
 <meta property="og:title" content="{e(full)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:type" content="website">
+<meta property="og:url" content="{URL_MARK}">
+<meta property="og:site_name" content="{SITE}">
+<meta property="og:image" content="{BASE}assets/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="{URL_MARK}">
 <link rel="stylesheet" href="{up}assets/style.css">
 </head>
 <body>
@@ -62,6 +70,7 @@ def page(title, desc, body, depth=1, path="", check_txt=None):
 def write(rel, text):
     p = OUT / rel
     p.parent.mkdir(parents=True, exist_ok=True)
+    text = text.replace(URL_MARK, BASE + rel.removesuffix("index.html"))
     p.write_text(text, encoding="utf-8")
 
 
@@ -1155,8 +1164,6 @@ def build_check():
 
 
 # ---------------- 検索エンジン用（Search Console 確認ファイル・サイトマップ・robots） ----------------
-DOMAIN = "seibi-note.com"
-BASE = f"https://{DOMAIN}/"
 GSC_FILE = "google64c86059b3bde811.html"  # 消さないこと（消すと Search Console の確認が外れる）
 
 
@@ -1175,6 +1182,7 @@ def main():
     css = (ROOT / "style.css").read_text(encoding="utf-8")
     write("assets/style.css", css)
     write(".nojekyll", "")
+    (OUT / "assets" / "ogp.png").write_bytes((ROOT / "ogp.png").read_bytes())  # 作り直すときは ogp.py
     build_index(); build_keikoku(); build_keikoku_pages(); build_oil(); build_koukan(); build_koukan_pages(); build_shien(); build_shaken(); build_about(); build_check()
     build_search()
     print("built:", sorted(str(p.relative_to(OUT)) for p in OUT.rglob("*") if p.is_file()))
