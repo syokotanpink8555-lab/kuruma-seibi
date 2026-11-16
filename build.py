@@ -15,6 +15,16 @@ UPDATED = "2026-11-16"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
 AD_CARNEXT = '<a href="https://px.a8.net/svt/ejp?a8mat=4BGK84+AMTRIY+32YG+HYFLU" rel="nofollow sponsored noopener">カーネクスト</a><img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4BGK84+AMTRIY+32YG+HYFLU" alt="">'
+AD_AUTOWAY = '<a href="https://px.a8.net/svt/ejp?a8mat=4BGK84+AINQAI+130Q+63WO2" rel="nofollow sponsored noopener">株式会社オートウェイ</a><img border="0" width="1" height="1" src="https://www12.a8.net/0.gif?a8mat=4BGK84+AINQAI+130Q+63WO2" alt="">'
+AD_TIRE = '''
+<section class="box ad">
+  <p class="ad-label">広告</p>
+  <h2>タイヤをネットで買って、お店で付けてもらう方法も</h2>
+  <p>交換するタイヤは、お店で買うほかに、ネットで買って取り付けだけお店に頼む方法もあります。</p>
+  <p>__AD_AUTOWAY__：輸入タイヤを中心に、タイヤ・ホイールを売っている通販です（広告主の案内では、海外のメーカーなどから直輸入）。オートウェイが運営する取付サービス「タイヤピット」の取付店に商品を直接送ってもらい、予約した日にそのお店で取り付けてもらえます。取り付けの工賃のほか、古いタイヤの処分料やバルブ交換料なども別にかかります。</p>
+  <p class="small">このリンクから購入があると、このサイトに紹介料が入ります。この枠は広告で、整備士がすすめているものではありません。タイヤは、工賃や処分料も含めた総額で、ほかのお店とも比べてから決めてください。サイズは、今のタイヤの横の表示（例：195/65R15 91H。最後の数字と記号まで同じものを）や取扱説明書で確認できます。注文する前に、製造時期がいつのものかも確かめておくと安心です（このページの基準は、製造から5年で交換）。</p>
+</section>
+'''.replace("__AD_AUTOWAY__", AD_AUTOWAY)
 CHECK_TXT_TODO = "現役の自動車整備士による内容チェックを順次行っています"
 CHECK_TXT = "一級自動車整備士・自動車検査員の資格をもつ現役の整備士がチェックしています" if REVIEWED else "現役の自動車整備士による内容チェックを順次行っています"
 
@@ -948,8 +958,12 @@ def build_koukan_pages():
         rel = [x for x in ITEMS if x["cat"] == it["cat"] and x["id"] != it["id"]]
         rel = "".join(f'<li><a href="../{x["id"]}/">{e(x["name"])}の交換時期</a></li>' for x in rel)
         rel = f'<h2>同じ種類のほかの項目（{CATS[it["cat"]]}）</h2><ul class="rel">{rel}</ul>' if rel else ""
+        has_ad = it["id"] == "tire"
+        pr = '<p class="pr">このページには広告が含まれています（ページ下の「広告」の枠）</p>' if has_ad else ""
+        ad = AD_TIRE if has_ad else ""
         body = f"""
 <p class="crumb"><a href="../../">トップ</a> ＞ <a href="../">消耗品の交換時期、整備士の本音</a></p>
+{pr}
 <article class="part">
   <div class="light-head"><h1>{e(it['name'])}の交換時期</h1><span class="badge b-info">{CATS[it['cat']]}</span></div>
   {alias}
@@ -972,6 +986,7 @@ def build_koukan_pages():
   {rel}
   <p><a href="../">→ 消耗品{len(ITEMS)}項目の一覧（今すぐ・近いうちに・様子見）</a>　<a href="../../shaken/">→ 車検費用の目安計算</a></p>
 </section>
+{ad}
 <p class="small">交換時期は車種・年式・使い方で変わります。自分の車の指定は、取扱説明書とメンテナンスノートで確認してください。</p>
 """
         desc = f"{it['name']}の交換時期を、現役の一級整備士の基準で「今すぐ・近いうちに・様子見」に。整備士の本音：{it['honne']}"
