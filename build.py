@@ -8,7 +8,7 @@ from data_koukan import ITEMS, CATS, CHECK_ALWAYS, ADDITIVES
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
 SITE = "くるま整備ノート"
-UPDATED = "2026-11-15"
+UPDATED = "2026-11-16"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
 AD_CARNEXT = '<a href="https://px.a8.net/svt/ejp?a8mat=4BGK84+AMTRIY+32YG+HYFLU" rel="nofollow sponsored noopener">カーネクスト</a><img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4BGK84+AMTRIY+32YG+HYFLU" alt="">'
