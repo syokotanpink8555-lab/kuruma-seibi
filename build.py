@@ -11,7 +11,7 @@ SITE = "くるま整備ノート"
 DOMAIN = "seibi-note.com"
 BASE = f"https://{DOMAIN}/"
 URL_MARK = "__PAGE_URL__"  # write() がページのURLに置きかえる
-UPDATED = "2026-11-16"
+UPDATED = "2026-11-17"
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
 AD_CARNEXT = '<a href="https://px.a8.net/svt/ejp?a8mat=4BGK84+AMTRIY+32YG+HYFLU" rel="nofollow sponsored noopener">カーネクスト</a><img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4BGK84+AMTRIY+32YG+HYFLU" alt="">'
@@ -974,7 +974,7 @@ def build_koukan_pages():
   <p>{e(it['risk'])}</p>
   {ask}
   {note}
-  <p class="gen"><b>一般的な目安（AIの小太郎が調べたもの）：</b>{e(it['general'])}</p>
+  <p class="gen"><b>一般的な目安（AIの小太郎が調べたもの）：</b>{e(it['general'])}</p>{chr(10) + '  ' + it['extra_html'] if it.get('extra_html') else ''}
 </article>
 
 <section class="box">
