@@ -1,0 +1,42 @@
+# Search Console 登録リクエストの記録（URL検査 → インデックス登録をリクエスト）
+
+1日の上限は11件ほど（11/17に「割り当て量を超えています」で確認）。リクエストしても順番が早まるだけで、登録が約束されるわけではない。
+
+| 日付 | URL | 検査結果 | 対応 |
+|---|---|---|---|
+| 11/17 | /koukan/tire/ | 未登録（認識されていない） | リクエスト済み |
+| 11/17 | /shaken/ | 登録済み | － |
+| 11/17 | /oil/ | 登録済み | － |
+| 11/17 | /shien/ | 未登録（認識されていない） | リクエスト済み |
+| 11/17 | /koukan/pad/ | 未登録（検出・未登録） | リクエスト済み |
+| 11/17 | /koukan/battery/ | 未登録（検出・未登録） | リクエスト済み |
+| 11/17 | /keikoku/engine/ | 登録済み | － |
+| 11/17 | /koukan/oil/ | 登録済み | － |
+| 11/17 | /koukan/wiper/ | 登録済み | － |
+| 11/17 | /koukan/brakefluid/ | 未登録（検出・未登録） | リクエスト済み |
+| 11/17 | /keikoku/oil/ | 未登録（認識されていない） | リクエスト済み |
+| 11/17 | /keikoku/brake/ | 登録済み | － |
+| 11/17 | /keikoku/water-hot/ | 未登録（検出・未登録） | リクエスト済み |
+| 11/17 | /koukan/llc/ | 未登録（認識されていない） | リクエスト済み |
+| 11/17 | /koukan/cvt/ | 登録済み | － |
+| 11/17 | /keikoku/water-cold/ | 未登録（検出・未登録） | リクエスト済み |
+| 11/17 | /koukan/plug/ | 登録済み | － |
+| 11/17 | /koukan/acfilter/ | 未登録 | リクエスト済み |
+| 11/17 | /koukan/element/ | 未登録 | リクエスト済み |
+| 11/17 | /koukan/aircleaner/ | 未登録 | **失敗：1日の割り当て量を超えた**（11件目まで成功、12件目で停止）→ 明日 |
+
+| 11/17 14時 | /koukan/aircleaner/ | 未登録（認識されていない） | リクエスト済み（成功） |
+| 11/17 14時 | /koukan/tbelt/ | 登録済み | － |
+| 11/17 14時 | /koukan/vbelt/ | 登録済み | － |
+| 11/17 14時 | /koukan/boot/ | 登録済み | － |
+| 11/17 14時 | /keikoku/abs/ | 登録済み | － |
+
+**1日の上限は11件（11/17に確認）。** 次の候補（上から、11/18以降。aircleaner・tbelt・vbelt・boot・abs は済み）：/koukan/inverter/、/keikoku/ 配下の残り（airbag, charge, door, dpf, eps, esc, fuel, glow, highbeam, master, seatbelt, tpms, washer）、/、/about/、/keikoku/、/koukan/
+
+| 11/17 夜 | /koukan/inverter/ | 登録済み | － |
+| 11/17 夜 | /keikoku/airbag/ charge/ door/ dpf/ eps/ esc/ fuel/ glow/ master/ washer/ | すべて登録済み | － |
+| 11/17 夜 | /keikoku/highbeam/ | 未登録（検出・未登録） | リクエスト済み（成功） |
+| 11/17 夜 | /keikoku/seatbelt/ | 未登録（検出・未登録） | 検査中に画面を閉じたため未確認 → 明日 |
+| 11/17 夜 | /keikoku/tpms/ | 未登録（検出・未登録） | **失敗：割り当て量を超えた** → 明日 |
+
+次の候補（11/18以降）：/keikoku/seatbelt/、/keikoku/tpms/、/、/about/、/keikoku/、/koukan/。これで /keikoku/ と /koukan/ 配下の個別ページはすべて検査済み。
