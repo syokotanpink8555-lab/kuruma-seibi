@@ -7,6 +7,9 @@ from data_koukan import ITEMS, CATS, CHECK_ALWAYS, ADDITIVES
 
 ROOT = Path(__file__).parent
 OUT = ROOT / "docs"
+# style.css を変えたら版番号が変わり、ブラウザが古いCSSを使い続けないようにする
+import hashlib
+CSS_VER = hashlib.md5((ROOT / "style.css").read_bytes()).hexdigest()[:8]
 SITE = "くるま整備ノート"
 DOMAIN = "seibi-note.com"
 BASE = f"https://{DOMAIN}/"
@@ -57,7 +60,7 @@ def page(title, desc, body, depth=1, path="", check_txt=None):
 <meta property="og:image" content="{BASE}assets/ogp.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{URL_MARK}">
-<link rel="stylesheet" href="{up}assets/style.css">
+<link rel="stylesheet" href="{up}assets/style.css?v={CSS_VER}">
 </head>
 <body>
 <header class="site-head"><div class="wrap">
