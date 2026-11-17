@@ -1,12 +1,15 @@
 :root{
+  color-scheme:light;
   --bg:#f7f7f5; --card:#fff; --ink:#1d2329; --sub:#5b6570; --line:#e2e4e7; --accent:#1f6feb;
   --red:#d93025; --red-bg:#fdecea; --yel:#e8a200; --yel-bg:#fff6dc; --grn:#1e8e3e; --blu:#1a73e8; --blu-bg:#e8f0fe;
 }
 @media (prefers-color-scheme:dark){:root{
+  color-scheme:dark;
   --bg:#14171a; --card:#1d2125; --ink:#e8eaed; --sub:#a0a8b0; --line:#2e343a; --accent:#6ea8fe;
   --red-bg:#3a1d1b; --yel-bg:#362b0f; --blu-bg:#172a46;
 }}
 *{box-sizing:border-box}
+.tool input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;width:20px;height:20px}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
 a{color:var(--accent)}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px}
