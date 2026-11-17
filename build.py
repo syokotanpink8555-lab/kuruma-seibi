@@ -227,8 +227,8 @@ def build_keikoku():
 
 
 # ---------------- オイル交換 ----------------
-# 係数は整備士のオーナーさんが調整ラボ（02_お願い/oil-lab.html）で決めた値（2026-11-13）
-OIL_P = dict(baseKm=4500, baseOil=3.7, oilExp=0.85, tireExp=0.9, kei=0.9,
+# 係数は整備士のオーナーさんが調整ラボ（02_お願い/oil-lab.html）で決めた値（2026-11-13、11/17 基準5,000km・オイル量の効き0.7に変更）
+OIL_P = dict(baseKm=5000, baseOil=3.7, oilExp=0.7, tireExp=0.9, kei=0.9,
              turbo=0.65, diesel=0.75, hv=1.5, city=0.8, old=0.8, lateMul=1.5,
              maxRec=10000, maxLate=12000)
 # 排気量(L) → オイル量(L・フィルター交換時)の目安（11/14 整備士のオーナーさん確認済み：おおよその量として全タイプ共通でOK）
@@ -282,6 +282,7 @@ def build_oil():
 <h1>オイル交換時期の計算ツール</h1>
 <p class="lead">排気量・オイル量・タイヤのサイズと、前回交換した日・走行距離を入れると、次の交換の<b>目安</b>を計算します。
 現役の一級自動車整備士の考え方をもとに、<b>「おすすめの時期」</b>と<b>「遅くともここまで」</b>の2段階で表示します。</p>
+<p>入力すると、<b>入力欄のすぐ下に結果が自動で出ます</b>（計算ボタンはありません）。最低限、<b>排気量</b>と<b>前回交換した日</b>を入れてください。</p>
 
 <div class="sev warn">
   <b>⚠️ 計算結果は「目安」です。</b>
@@ -345,11 +346,11 @@ def build_oil():
   <label><span>今の走行距離（km）<span class="opt">わかれば</span></span><input id="odo1" type="number" inputmode="numeric" min="0" placeholder="例：45500"></label>
 </form>
 
-<div id="out" class="result" aria-live="polite" hidden></div>
+<div id="out" class="result" aria-live="polite"><p class="small">結果はここに出ます。</p></div>
 
 <section class="box">
   <h2>計算の考え方</h2>
-  <p>基準は<b>1.5Lのガソリン車（オイル3.7L・タイヤ175/65R15）で、おすすめ4,500km</b>。そこから次の3つで早めたり遅めたりしています。</p>
+  <p>基準は<b>1.5Lのガソリン車（オイル3.7L・タイヤ175/65R15）で、おすすめ5,000km</b>。そこから次の3つで早めたり遅めたりしています。</p>
   <ul>
     <li><b>オイル量</b>：オイルが多いほど、1Lあたりの負担が減って長持ちします。</li>
     <li><b>タイヤの外径</b>：外径が大きいほど、1km走るあいだのタイヤの回転が少なく、エンジンの回転も少なくてすみます。インチの数字ではなく、タイヤ全体の直径で考えます。</li>
@@ -445,8 +446,12 @@ def build_oil():
   function run(){
     var type=$('type').value;
     $('custom').hidden=type!=='custom';$('spec').hidden=type==='custom';
-    var km,lim,mo,note='';
-    if(type==='custom'){km=n($('ckm').value);mo=Math.min(n($('cmo').value)||0,36);lim=null;if(!km||!mo){out.hidden=true;return}}
+    var km,lim,mo,note='',need=[];
+    if(type==='custom'){if(!n($('ckm').value)||!n($('cmo').value))need.push('交換の距離と期間')}
+    else if(!num($('disp').value))need.push('排気量');
+    if(!$('date').value)need.push('前回交換した日');
+    if(need.length){out.innerHTML='<h2>次のオイル交換の目安</h2><p class="small">結果はここに出ます。あと<b>「'+need.join('」「')+'」</b>を入れてください。</p>';out.hidden=false;return}
+    if(type==='custom'){km=n($('ckm').value);mo=Math.min(n($('cmo').value)||0,36);lim=null}
     else{var r=calc();if(!r){out.hidden=true;return}
       if(r.err){out.innerHTML='<p class="st st-soon">'+r.err+'</p>';out.hidden=false;return}
       km=r.km;lim=r.lim;mo=r.mo;note=r.note}
