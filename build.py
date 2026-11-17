@@ -780,6 +780,20 @@ def build_shaken():
 LV3 = [("red", "🔴 今すぐ"), ("yellow", "🟡 近いうちに"), ("white", "⚪ 様子見でいい")]
 
 
+
+SHEET_IDS = {"oil","element","brakefluid","cvt","battery","tire","wiper","acfilter","aircleaner","plug","pad","vbelt"}
+SHEET_BOX = """<section class="box" id="sheet">
+  <h2>交換の記録を残すシート（BOOTH・300円）</h2>
+  <p>いつ・どこで・何km時点で替えたかを記録すると、次の交換時期の目安が🔴🟡⚪で出る、ExcelとGoogleスプレッドシート用のシートです。このサイトの基準（整備士のチェックを受けた年数・距離）をもとにしています。ほかのお店や自分で交換したものも、すべて記録しておくのがコツです。</p>
+  <ul>
+    <li>価格：300円（2026年12月31日まで。そのあとは500円の予定）</li>
+    <li>AIの小太郎が作りました。表示は目安で、取扱説明書の指定が優先です。ディーゼル車は目安の対象外です。</li>
+  </ul>
+  <p><a href="https://kotaro-tools.booth.pm/items/9169139" rel="noopener">→ BOOTHで見る：メンテ記録＆交換時期チェックシート</a></p>
+</section>
+"""
+
+
 def build_koukan():
     items = []
     for it in ITEMS:
@@ -861,6 +875,8 @@ def build_koukan():
   <p class="tip">⚠️ 自分で選んだ添加剤を入れるときは注意。オイルと添加剤の組み合わせによっては、エンジンを傷めたり、オイルが固まったりすることがあります。
   整備士によると、ディーラーで売っているものは、そのディーラーで使うオイルに入れても問題ないことが確認されているそうです。</p>
 </section>
+
+{SHEET_BOX}
 
 <section class="box">
   <h2>このページについて</h2>
@@ -967,6 +983,7 @@ def build_koukan_pages():
         rel = "".join(f'<li><a href="../{x["id"]}/">{e(x["name"])}の交換時期</a></li>' for x in rel)
         rel = f'<h2>同じ種類のほかの項目（{CATS[it["cat"]]}）</h2><ul class="rel">{rel}</ul>' if rel else ""
         has_ad = it["id"] == "tire"
+        sheet = SHEET_BOX if it["id"] in SHEET_IDS else ""
         pr = '<p class="pr">このページには広告が含まれています（ページ下の「広告」の枠）</p>' if has_ad else ""
         ad = AD_TIRE if has_ad else ""
         body = f"""
@@ -994,6 +1011,7 @@ def build_koukan_pages():
   {rel}
   <p><a href="../">→ 消耗品{len(ITEMS)}項目の一覧（今すぐ・近いうちに・様子見）</a>　<a href="../../shaken/">→ 車検費用の目安計算</a></p>
 </section>
+{sheet}
 {ad}
 <p class="small">交換時期は車種・年式・使い方で変わります。自分の車の指定は、取扱説明書とメンテナンスノートで確認してください。</p>
 """
