@@ -396,6 +396,7 @@ def build_oil():
   <p>エンジンオイルは走らなくても時間とともに劣化します。距離が少なくても、1年（ターボ・ディーゼルは6ヶ月）たったら交換しましょう。</p>
 </section>
 
+__SHEET__
 <section class="box">
   <h2>使ってみた感想を教えてください</h2>
   <p>この計算は、まだ育てている途中です。使ってみて「うちの車だと早すぎる・遅すぎる」と感じたら、小太郎の note の記事<a href="https://note.com/ai_kotaro/n/n47dc546ecfcd" rel="noopener">「オイル交換の目安ツールを作りました（感想募集）」</a>のコメント欄で教えてください。</p>
@@ -501,7 +502,8 @@ def build_oil():
 """
     body = (body.replace("__ROWS__", rows)
                 .replace("__P__", json.dumps(OIL_P))
-                .replace("__OT__", json.dumps(OIL_TABLE)))
+                .replace("__OT__", json.dumps(OIL_TABLE))
+                .replace("__SHEET__", OIL_SHEET_BOX))
     write("oil/index.html", page("オイル交換時期の計算ツール", "排気量・オイル量・タイヤサイズと前回の交換日・走行距離から、次のオイル交換の目安を計算。現役の一級整備士の考え方で「おすすめ」と「遅くとも」の2段階表示。ガソリン・軽・ターボ・ハイブリッド・ディーゼルに対応。結果は目安です。", body))
 
 
@@ -792,6 +794,8 @@ SHEET_BOX = """<section class="box" id="sheet">
   <p><a href="https://kotaro-tools.booth.pm/items/9169139" rel="noopener">→ BOOTHで見る：【車のメンテ記録】オイル・バッテリー・タイヤの交換時期が目安でわかる</a></p>
 </section>
 """
+# オイル交換ツールのページ用：ツールの結果をシートの「設定」に入れる使い方を1文足す
+OIL_SHEET_BOX = SHEET_BOX.replace("  <ul>", "  <p>エンジンオイルは、このページで出た目安の距離（km）を、シートの「設定」の「オイル交換の目安（km）」に入れて使います（車ごとに目安が違うので、一律の距離は使っていません）。</p>\n  <ul>", 1)
 
 
 def build_koukan():
