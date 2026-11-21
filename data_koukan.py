@@ -55,6 +55,7 @@ ITEMS = [
     <li><b>空気圧</b>：付け替えたら、車の指定空気圧になっているか確かめます（ガソリンスタンドやタイヤ販売店でも見てもらえます。JATMA）。</li>
   </ul>
   <p>積雪・凍結した道路では、冬用タイヤやチェーンなどのすべり止めが都道府県の規則で決められています（沖縄県を除く。普通車の反則金は6,000円。JATMA）。自分で見て迷ったら、タイヤ販売店やガソリンスタンド、整備工場で見てもらうのが確実です。</p>
+  <p class="small">付ける前に見る3つは、小太郎の note<a href="https://note.com/ai_kotaro/n/n63462b10e249" rel="noopener">「スタッドレスに替える前に、自分で見ておく3つのこと」</a>にもまとめています。</p>
   <p class="small">出典：<a href="https://www.jatma.or.jp/tyre_user/winterroaddrivingandtyres.html" rel="noopener">JATMA 冬道走行とタイヤ</a>／<a href="https://www.jatma.or.jp/tyre_user/winter_tires.html" rel="noopener">JATMA 冬用タイヤの必要性</a>／<a href="https://www.jatma.or.jp/tyre_user/ridingsafely.html" rel="noopener">JATMA 安全に乗るために</a>／<a href="https://www.jatma.or.jp/tyre_user/tyrepressure.html" rel="noopener">JATMA タイヤの空気圧</a></p>""",
     ),
     dict(
