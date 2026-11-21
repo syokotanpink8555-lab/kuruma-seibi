@@ -967,9 +967,17 @@ def build_keikoku_pages():
 </section>
 <p class="small">マークの形や色は車種によって異なることがあります。正確な意味は取扱説明書で確認してください。</p>
 """
-        desc = f"{L['name']}（{L['look']}）が点いたときの意味と、まずやること。{L['meaning']}"
+        # 検索結果で色と緊急度が先に見えるように。説明は文の途中で切らない
+        c1 = COLOR[L['color']][0]
+        desc = f"【{c1}・{lv}】{L['name']}（{L['look']}）が点いたときの意味と、まずやること。"
+        if len(desc + L['meaning']) > 120:
+            desc = (desc + L['meaning'])[:120]
+        else:
+            desc += L['meaning']
+            if L['tip'] and len(desc + L['tip']) <= 120:
+                desc += L['tip']
         write(f"keikoku/{L['id']}/index.html",
-              page(f"{L['name']}が点いたら｜意味と対処", desc[:120], body, depth=2,
+              page(f"{L['name']}が点いたら｜{c1}・{lv}｜意味と対処", desc, body, depth=2,
                    check_txt=DIESEL_TXT if diesel else None))
 
 
