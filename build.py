@@ -1,5 +1,6 @@
 """くるま整備ノート ビルド: python build.py → docs/ にサイト一式（GitHub Pagesは /docs を公開）"""
 import html
+import json
 from pathlib import Path
 
 from data_keikoku import LIGHTS
@@ -41,10 +42,23 @@ LEVEL = {
 e = lambda s: html.escape(s, quote=True)
 
 
-def page(title, desc, body, depth=1, path="", check_txt=None):
+def ld_json(data):
+    # 検索結果にパンくず・サイト名を出してもらうための構造化データ（schema.org）
+    return '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False) + '</script>'
+
+
+def page(title, desc, body, depth=1, path="", check_txt=None, crumbs=None):
     up = "../" * depth
     check = check_txt or CHECK_TXT
     full = SITE if not title else f"{title}｜{SITE}"
+    if depth == 0:
+        ld = ld_json({"@context": "https://schema.org", "@type": "WebSite", "name": SITE, "url": BASE})
+    elif crumbs:  # [(名前, "keikoku/" のような相対パス), ...]。最後はそのページ
+        ld = ld_json({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": i, "name": n, "item": BASE + r}
+            for i, (n, r) in enumerate([("トップ", "")] + crumbs, 1)]})
+    else:
+        ld = ""
     return f"""<!doctype html>
 <html lang="ja">
 <head>
@@ -61,6 +75,7 @@ def page(title, desc, body, depth=1, path="", check_txt=None):
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="{URL_MARK}">
 <link rel="stylesheet" href="{up}assets/style.css?v={CSS_VER}">
+{ld}
 </head>
 <body>
 <header class="site-head"><div class="wrap">
@@ -978,7 +993,8 @@ def build_keikoku_pages():
                 desc += L['tip']
         write(f"keikoku/{L['id']}/index.html",
               page(f"{L['name']}が点いたら｜{c1}・{lv}｜意味と対処", desc, body, depth=2,
-                   check_txt=DIESEL_TXT if diesel else None))
+                   check_txt=DIESEL_TXT if diesel else None,
+                   crumbs=[("警告灯の意味一覧", "keikoku/"), (f"{L['name']}が点いたら", f"keikoku/{L['id']}/")]))
 
 
 def build_koukan_pages():
@@ -1030,7 +1046,8 @@ def build_koukan_pages():
 """
         desc = f"{it['name']}の交換時期を、現役の一級整備士の基準で「今すぐ・近いうちに・様子見」に。整備士の本音：{it['honne']}"
         write(f"koukan/{it['id']}/index.html",
-              page(f"{it['name']}の交換時期｜整備士の基準", desc[:120], body, depth=2))
+              page(f"{it['name']}の交換時期｜整備士の基準", desc[:120], body, depth=2,
+                   crumbs=[("消耗品の交換時期、整備士の本音", "koukan/"), (f"{it['name']}の交換時期", f"koukan/{it['id']}/")]))
 
 
 # ---------------- 運転支援の3機能（「これ何？」と聞かれるもの） ----------------
