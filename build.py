@@ -934,6 +934,15 @@ def build_koukan():
 
 
 # ---------------- 個別ページ（検索の入口。中身は一覧と同じ、チェック済みのデータだけを使う） ----------------
+# 警告灯 → 関係する消耗品の交換時期（ページどうしの案内だけ。本文は変えない）
+KEIKOKU_KOUKAN = {
+    "brake": ["brakefluid", "pad"],
+    "oil": ["oil"],
+    "charge": ["battery", "vbelt"],
+    "water-hot": ["llc"],
+    "tpms": ["tire"],
+    "washer": ["wiper"],
+}
 DIESEL_IDS = {"glow", "dpf"}
 DIESEL_TXT = "現役の整備士がチェックしています。ただし、ディーゼル車の内容は、その整備士の専門外です"
 
@@ -948,6 +957,14 @@ def build_keikoku_pages():
                  'とくに参考程度にして、取扱説明書を優先してください。</p>') if diesel else ""
         rel = [x for x in LIGHTS if x["color"] == L["color"] and x["id"] != L["id"]]
         rel = "".join(f'<li><a href="../{x["id"]}/"><span class="dot dot-{x["color"]}"></span>{e(x["name"])}</a></li>' for x in rel)
+        parts = [x for k in KEIKOKU_KOUKAN.get(L["id"], []) for x in ITEMS if x["id"] == k]
+        parts = "".join(f'<li><a href="../../koukan/{x["id"]}/">{e(x["name"])}の交換時期</a></li>' for x in parts)
+        parts = f"""
+<section class="box">
+  <h2>関係する消耗品の交換時期（整備士の基準）</h2>
+  <ul class="rel">{parts}</ul>
+</section>
+""" if parts else ""
         body = f"""
 <p class="crumb"><a href="../../">トップ</a> ＞ <a href="../">警告灯の意味一覧</a></p>
 <article class="light c-{L['color']}">
@@ -974,7 +991,7 @@ def build_keikoku_pages():
   </ul>
   <p>「走れる」警告灯でも、運転するのが不安なときは無理に走らず、レッカーを呼ぶのも手です（<a href="../#tow">レッカーという選択肢</a>）。</p>
 </section>
-
+{parts}
 <section class="box">
   <h2>同じ色のほかの警告灯</h2>
   <ul class="rel">{rel}</ul>
@@ -1011,6 +1028,9 @@ def build_koukan_pages():
         rel = [x for x in ITEMS if x["cat"] == it["cat"] and x["id"] != it["id"]]
         rel = "".join(f'<li><a href="../{x["id"]}/">{e(x["name"])}の交換時期</a></li>' for x in rel)
         rel = f'<h2>同じ種類のほかの項目（{CATS[it["cat"]]}）</h2><ul class="rel">{rel}</ul>' if rel else ""
+        lights = [L for L in LIGHTS if it["id"] in KEIKOKU_KOUKAN.get(L["id"], [])]
+        lights = "".join(f'<li><a href="../../keikoku/{L["id"]}/"><span class="dot dot-{L["color"]}"></span>{e(L["name"])}が点いたら</a></li>' for L in lights)
+        rel += f'<h2>関係する警告灯</h2><ul class="rel">{lights}</ul>' if lights else ""
         has_ad = it["id"] == "tire"
         sheet = SHEET_BOX if it["id"] in SHEET_IDS else ""
         pr = '<p class="pr">このページには広告が含まれています（ページ下の「広告」の枠）</p>' if has_ad else ""
