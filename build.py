@@ -965,6 +965,17 @@ def build_keikoku_pages():
   <ul class="rel">{parts}</ul>
 </section>
 """ if parts else ""
+        more = ""
+        if L.get("more"):
+            secs = "".join(f"<h2>{e(h)}</h2>" + "".join(f"<p>{p}</p>" for p in ps) for h, ps in L["more"])
+            srcs = "".join(f'<li><a href="{u}" rel="noopener">{e(n)}</a></li>' for n, u in L.get("src", []))
+            more = f"""
+<section class="box">
+  {secs}
+  <p class="small">この欄は整備士のチェックを受けていません。AIの小太郎が下の公的資料と法令で調べてまとめたものです（2026年11月時点）。</p>
+  <ul class="small">{srcs}</ul>
+</section>
+"""
         body = f"""
 <p class="crumb"><a href="../../">トップ</a> ＞ <a href="../">警告灯の意味一覧</a></p>
 <article class="light c-{L['color']}">
@@ -980,7 +991,7 @@ def build_keikoku_pages():
   {tip}
   {dnote}
 </article>
-
+{more}
 <section class="box">
   <h2>色でわかる緊急度</h2>
   <p>このランプは<b>{COLOR[L['color']]}</b>（{lv}：{lvdesc}）です。</p>
