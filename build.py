@@ -1214,6 +1214,26 @@ def build_about():
     write("about/index.html", page("このサイトについて", "くるま整備ノートの運営者・免責事項。AIが作り、一級自動車整備士が内容をチェックしています。", body))
 
 
+# ---------------- 見つからないページ（GitHub Pages はどの階層でも /404.html を返す） ----------------
+def build_404():
+    body = """
+<h1>ページが見つかりませんでした</h1>
+<p>URLがまちがっているか、ページの場所が変わった可能性があります。下の一覧から探してください。</p>
+<div class="cards">
+  <a class="card" href="keikoku/"><span class="card-ic">⚠️</span><h2>警告灯の意味一覧</h2><p>メーターに出たランプの意味と、まずやること。</p></a>
+  <a class="card" href="koukan/"><span class="card-ic">🧰</span><h2>消耗品の交換時期一覧</h2><p>ブレーキパッド・タイヤ・バッテリーなど16項目。</p></a>
+  <a class="card" href="oil/"><span class="card-ic">🛢️</span><h2>オイル交換時期の計算</h2><p>前回の交換日から、次の目安を計算。</p></a>
+  <a class="card" href="shaken/"><span class="card-ic">📋</span><h2>車検費用の目安計算</h2><p>重量税・自賠責・印紙代と、お店の費用の相場。</p></a>
+</div>
+<p><a href="./">トップページへ</a></p>
+"""
+    text = page("ページが見つかりませんでした", "お探しのページは見つかりませんでした。", body, depth=0)
+    # どの階層で表示されても相対リンクが切れないよう / を基準にし、検索には載せない
+    text = "\n".join(l for l in text.split("\n") if URL_MARK not in l and "application/ld+json" not in l)
+    text = text.replace("<head>\n", '<head>\n<base href="/">\n<meta name="robots" content="noindex">\n', 1)
+    write("404.html", text)
+
+
 # ---------------- 整備士チェック表 ----------------
 def build_check():
     lines = ["# 整備士チェック表（警告灯）", "",
@@ -1275,7 +1295,7 @@ def main():
     write("assets/style.css", css)
     write(".nojekyll", "")
     (OUT / "assets" / "ogp.png").write_bytes((ROOT / "ogp.png").read_bytes())  # 作り直すときは ogp.py
-    build_index(); build_keikoku(); build_keikoku_pages(); build_oil(); build_koukan(); build_koukan_pages(); build_shien(); build_shaken(); build_about(); build_check()
+    build_index(); build_keikoku(); build_keikoku_pages(); build_oil(); build_koukan(); build_koukan_pages(); build_shien(); build_shaken(); build_about(); build_404(); build_check()
     build_search()
     print("built:", sorted(str(p.relative_to(OUT)) for p in OUT.rglob("*") if p.is_file()))
 
