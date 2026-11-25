@@ -1,6 +1,8 @@
 """くるま整備ノート ビルド: python build.py → docs/ にサイト一式（GitHub Pagesは /docs を公開）"""
+import datetime
 import html
 import json
+import re
 from pathlib import Path
 
 from data_keikoku import LIGHTS
@@ -15,7 +17,10 @@ SITE = "くるま整備ノート"
 DOMAIN = "seibi-note.com"
 BASE = f"https://{DOMAIN}/"
 URL_MARK = "__PAGE_URL__"  # write() がページのURLに置きかえる
-UPDATED = "2026-11-17"
+# 「最終更新」はページごと：中身が前回と同じなら前の日付のまま、変わったら今日（write() が入れる）
+DATE_MARK = "__UPDATED__"
+TODAY = datetime.date.today().isoformat()
+PAGE_DATES = {}  # rel → 最終更新日（サイトマップの lastmod に使う）
 # 整備士チェックが終わったら True にする（それまでは「チェック済み」と書かない）
 REVIEWED = True
 AD_CARNEXT = '<a href="https://px.a8.net/svt/ejp?a8mat=4BGK84+AMTRIY+32YG+HYFLU" rel="nofollow sponsored noopener">カーネクスト</a><img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4BGK84+AMTRIY+32YG+HYFLU" alt="">'
@@ -88,17 +93,29 @@ def page(title, desc, body, depth=1, path="", check_txt=None, crumbs=None):
 <footer class="site-foot"><div class="wrap">
   <p>このサイトは、AIの「小太郎」が作り、{check}。
   車の状態は車種や年式で違います。最終的には取扱説明書と整備工場の判断に従ってください。</p>
-  <p><a href="{up}about/">運営・免責事項</a>　最終更新 {UPDATED}</p>
+  <p><a href="{up}about/">運営・免責事項</a>　最終更新 {DATE_MARK}</p>
 </div></footer>
 </body>
 </html>
 """
 
 
+def _same(old, new):
+    """日付とCSSの版番号を除いて、前回と同じ中身か"""
+    norm = lambda t: re.sub(r"style\.css\?v=\w+", "", re.sub(r"最終更新 [\w-]+", "", t))
+    return norm(old) == norm(new)
+
+
 def write(rel, text):
     p = OUT / rel
     p.parent.mkdir(parents=True, exist_ok=True)
     text = text.replace(URL_MARK, BASE + rel.removesuffix("index.html"))
+    if DATE_MARK in text:
+        old = p.read_text(encoding="utf-8") if p.exists() else ""
+        m = re.search(r"最終更新 ([\d-]+)", old)
+        date = m.group(1) if m and _same(old, text) else TODAY
+        PAGE_DATES[rel] = date
+        text = text.replace(DATE_MARK, date)
     p.write_text(text, encoding="utf-8")
 
 
@@ -1293,9 +1310,9 @@ GSC_FILE = "google64c86059b3bde811.html"  # 消さないこと（消すと Searc
 def build_search():
     write("CNAME", DOMAIN + "\n")  # GitHub Pages の独自ドメイン
     write(GSC_FILE, f"google-site-verification: {GSC_FILE}")
-    urls = sorted(str(p.parent.relative_to(OUT)) for p in OUT.rglob("index.html"))
-    locs = [BASE + ("" if u == "." else u + "/") for u in urls]
-    items = "\n".join(f"  <url><loc>{u}</loc><lastmod>{UPDATED}</lastmod></url>" for u in locs)
+    rels = sorted(str(p.relative_to(OUT)) for p in OUT.rglob("index.html"))
+    items = "\n".join(f"  <url><loc>{BASE + r.removesuffix('index.html')}</loc><lastmod>{PAGE_DATES.get(r, TODAY)}</lastmod></url>"
+                      for r in rels)
     write("sitemap.xml", f'<?xml version="1.0" encoding="UTF-8"?>\n'
           f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{items}\n</urlset>\n')
     write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {BASE}sitemap.xml\n")
